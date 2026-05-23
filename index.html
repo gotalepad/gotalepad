@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Novel Website</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: white;
+        }
+
+        header {
+            background: #1e1e1e;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+            color: orange;
+        }
+
+        nav a {
+            color: white;
+            margin-left: 20px;
+            text-decoration: none;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 80px 20px;
+        }
+
+        .hero h1 {
+            font-size: 50px;
+        }
+
+        .hero button {
+            padding: 15px 30px;
+            background: orange;
+            border: none;
+            color: black;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 8px;
+        }
+
+        .novels {
+            padding: 40px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .card {
+            background: #222;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            background: #1e1e1e;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">Gotalepad</div>
+    <nav>
+        <a href="#">Home</a>
+        <a href="#">Login</a>
+        <a href="#">Register</a>
+        <a href="#">Penulis</a>
+    </nav>
+</header>
+
+<section class="hero">
+    <h1>Baca Novel & Dukung Penulis</h1>
+    <p>Platform novel online dengan donasi untuk penulis</p>
+    <button>Mulai Membaca</button>
+</section>
+
+<section class="novels">
+    <h2>Novel Populer</h2>
+    <div class="grid">
+        <div class="card">Novel 1</div>
+        <div class="card">Novel 2</div>
+        <div class="card">Novel 3</div>
+        <div class="card">Novel 4</div>
+    </div>
+</section>
+
+<footer>
+    © 2026 GoTalePad
+</footer>
+
+</body>
+</html>
