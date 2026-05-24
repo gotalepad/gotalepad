@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<link rel="stylesheet"
+href="style.css">
+
+</head>
+
+<body>
+
+<div class="read-container">
+
+<h1 id="chapterTitle"></h1>
+<p id="viewCount"></p>
+
+<div
+class="story-content"
+id="chapterContent">
+</div>
+<!-- COMMENT SECTION -->
+
+<div class="comment-section">
+
+<h2>Komentar</h2>
+
+<div class="comment-form">
+
+<textarea
+id="commentInput"
+placeholder="Tulis komentar...">
+</textarea>
+
+<button id="sendCommentBtn">
+Kirim
+</button>
+
+</div>
+
+<div id="commentList">
+
+</div>
+
+</div>
+
+</div>
+
+<script type="module">
+
+import { db, auth }
+from './js/firebase.js';
+
+import {
+doc,
+getDoc,
+collection,
+addDoc,
+getDocs,
+query,
+orderBy,
+updateDoc
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import {
+onAuthStateChanged
+}
+
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const params =
+new URLSearchParams(window.location.search);
+
+const storyId =
+params.get("story");
+
+const chapterId =
+params.get("chapter");
+
+async function loadChapter(){
+    let currentUser = null;
+
+onAuthStateChanged(auth,
+(user)=>{
+
+currentUser = user;
+
+});
+
+const docRef =
+doc(
+db,
+"stories",
+storyId,
+"chapters",
+chapterId
+);
+
+const snap =
+await getDoc(docRef);
+
+if(snap.exists()){
+    const data = snap.data();
+
+if(!data.views){
+
+data.views = 0;
+
+}
+
+const data = snap.data();
+
+document.getElementById("chapterTitle")
+.innerText = data.title;
+document.getElementById("viewCount")
+.innerText =
+(data.views || 0) + " views";
+
+document.getElementById("chapterContent")
+.innerText = data.content;
+await updateDoc(docRef,{
+views:(data.views || 0) + 1
+});
+
+}
+
+}
+
+loadChapter();
+
+loadComments();
+async function loadComments(){
+    document
+.getElementById("sendCommentBtn")
+.onclick = async ()=>{
+
+if(!currentUser){
+
+alert("Login terlebih dahulu!");
+
+window.location.href =
+"login.html";
+
+return;
+
+}
+
+const userDoc =
+await getDoc(
+doc(db,"users",currentUser.uid)
+);
+
+const userData =
+userDoc.data();
+
+const comment =
+document
+.getElementById("commentInput")
+.value;
+
+if(comment.trim() == "") return;
+
+await addDoc(
+collection(
+db,
+"stories",
+storyId,
+"chapters",
+chapterId,
+"comments"
+),
+{
+username:userData.username,
+userId:currentUser.uid,
+comment:comment,
+createdAt:Date.now()
+}
+);
+
+document
+.getElementById("commentInput")
+.value = "";
+
+loadComments();
+
+};
+
+const commentList =
+document.getElementById("commentList");
+
+commentList.innerHTML = "";
+
+const q =
+query(
+collection(
+db,
+"stories",
+storyId,
+"chapters",
+chapterId,
+"comments"
+),
+orderBy("createdAt","desc")
+);
+
+const querySnapshot =
+await getDocs(q);
+
+querySnapshot.forEach((doc)=>{
+
+const data = doc.data();
+
+const date =
+new Date(data.createdAt);
+
+commentList.innerHTML += `
+
+<div class="comment-card">
+
+<div class="comment-user">
+${data.username}
+</div>
+
+<div>
+${data.comment}
+</div>
+
+<div class="comment-time">
+${date.toLocaleString()}
+</div>
+
+</div>
+
+`;
+
+});
+
+}
+
+</script>
+
+</body>
+</html>
