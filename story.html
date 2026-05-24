@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Novel</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<header class="navbar">
+
+<div class="logo">
+Gotalepad
+</div>
+
+<nav>
+<a href="index.html">Home</a>
+<a href="write.html">Tulis</a>
+</nav>
+
+</header>
+
+<div class="story-detail">
+
+<img id="storyCover">
+
+<div class="story-meta">
+
+<h1 id="storyTitle"></h1>
+
+<p id="storyAuthor"></p>
+<div class="story-actions">
+
+<button id="likeBtn">
+❤️ Vote
+</button>
+
+<button id="bookmarkBtn">
+ Library
+</button>
+
+<p id="likeCount">
+0 votes
+</p>
+
+</div>
+
+<button id="addChapterBtn">
+Tambah Chapter
+</button>
+
+</div>
+
+</div>
+
+<div class="chapter-list"
+id="chapterList">
+
+</div>
+
+<script type="module">
+
+import { db, auth }
+from './js/firebase.js';
+
+import {
+doc,
+getDoc,
+collection,
+getDocs,
+query,
+orderBy,
+setDoc,
+deleteDoc
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import {
+onAuthStateChanged
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const params =
+new URLSearchParams(window.location.search);
+
+const storyId =
+params.get("id");
+let currentUser = null;
+
+onAuthStateChanged(auth,
+(user)=>{
+
+currentUser = user;
+
+});
+
+async function loadStory(){
+
+const docRef =
+doc(db,"stories",storyId);
+
+const snap =
+await getDoc(docRef);
+
+if(snap.exists()){
+
+const data = snap.data();
+
+document.getElementById("storyTitle")
+.innerText = data.title;
+
+document.getElementById("storyAuthor")
+.innerText = "Penulis: " + data.author;
+
+document.getElementById("storyCover")
+.src = data.cover;
+
+}
+
+}
+
+async function loadChapters(){
+
+const chapterList =
+document.getElementById("chapterList");
+
+chapterList.innerHTML = "";
+
+const q =
+query(
+collection(
+db,
+"stories",
+storyId,
+"chapters"
+),
+orderBy("chapterNumber")
+);
+
+const querySnapshot =
+await getDocs(q);
+
+querySnapshot.forEach((doc)=>{
+
+const data = doc.data();
+
+chapterList.innerHTML += `
+
+<a
+href="chapter.html?story=${storyId}&chapter=${doc.id}"
+class="chapter-card">
+
+<h3>
+Chapter ${data.chapterNumber}
+</h3>
+
+<p>${data.title}</p>
+
+</a>
+
+`;
+
+});
+
+}
+
+document
+.getElementById("addChapterBtn")
+.onclick = ()=>{
+
+window.location.href =
+`addchapter.html?id=${storyId}`;
+
+};
+
+async function loadLikes(){
+
+const likesSnapshot =
+await getDocs(
+collection(
+db,
+"stories",
+storyId,
+"likes"
+)
+);
+
+document
+.getElementById("likeCount")
+.innerText =
+likesSnapshot.size + " votes";
+
+}
+
+document
+.getElementById("likeBtn")
+.onclick = async ()=>{
+    document
+.getElementById("bookmarkBtn")
+.onclick = async ()=>{
+
+if(!currentUser){
+
+alert("Login terlebih dahulu!");
+
+window.location.href =
+"login.html";
+
+return;
+
+}
+
+const bookmarkRef =
+doc(
+db,
+"users",
+currentUser.uid,
+"library",
+storyId
+);
+
+const bookmarkDoc =
+await getDoc(bookmarkRef);
+
+if(bookmarkDoc.exists()){
+
+await deleteDoc(bookmarkRef);
+
+alert("Dihapus dari library");
+
+}else{
+
+await setDoc(bookmarkRef,{
+storyId:storyId,
+savedAt:Date.now()
+});
+
+alert("Ditambahkan ke library!");
+
+}
+
+};
+
+if(!currentUser){
+
+alert("Login terlebih dahulu!");
+
+window.location.href =
+"login.html";
+
+return;
+
+}
+
+const likeRef =
+doc(
+db,
+"stories",
+storyId,
+"likes",
+currentUser.uid
+);
+
+const likeDoc =
+await getDoc(likeRef);
+
+if(likeDoc.exists()){
+
+await deleteDoc(likeRef);
+
+}else{
+
+await setDoc(likeRef,{
+liked:true
+});
+
+}
+
+loadLikes();
+
+};
+}
+
+loadStory();
+
+loadChapters();
+
+loadLikes();
+
+
+</script>
+
+</body>
+</html>

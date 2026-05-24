@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Tulis Novel</title>
+
+<link rel="stylesheet"
+href="style.css">
+
+</head>
+
+<body>
+
+<div class="write-container">
+
+<h1>Buat Novel</h1>
+
+<input
+type="text"
+id="title"
+placeholder="Judul Novel">
+
+<input
+type="file"
+id="cover">
+
+<input
+type="text"
+id="chapterTitle"
+placeholder="Judul Chapter 1">
+
+<textarea
+id="content"
+placeholder="Mulai Menulis adalah caraku bercerita kepada dunia. adalah caraku bercerita kepada dunia. chapter pertama..."
+></textarea>
+
+<button id="publishBtn">
+Publish Novel
+</button>
+
+</div>
+
+
+
+<script type="module">
+
+import { db, auth }
+from './js/firebase.js';
+
+import {
+onAuthStateChanged
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+collection,
+addDoc,
+doc,
+getDoc
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import {
+getStorage,
+ref,
+uploadBytes,
+getDownloadURL
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+
+
+const storage =
+getStorage();
+
+let currentUser = null;
+
+
+
+/* =========================
+   CEK USER LOGIN
+========================= */
+
+onAuthStateChanged(auth,
+(user)=>{
+
+if(!user){
+
+alert("Login terlebih dahulu!");
+
+window.location.href =
+"login.html";
+
+return;
+
+}
+
+currentUser = user;
+
+});
+
+
+
+/* =========================
+   PUBLISH STORY
+========================= */
+
+document
+.getElementById("publishBtn")
+.onclick = async ()=>{
+
+const title =
+document.getElementById("title").value;
+
+const chapterTitle =
+document.getElementById("chapterTitle").value;
+
+const content =
+document.getElementById("content").value;
+
+const file =
+document.getElementById("cover").files[0];
+
+
+
+if(
+!title ||
+!chapterTitle ||
+!content ||
+!file
+){
+
+alert("Lengkapi semua data!");
+
+return;
+
+}
+
+
+
+try{
+
+
+
+/* =========================
+   AMBIL USER DATA
+========================= */
+
+const userDoc =
+await getDoc(
+doc(
+db,
+"users",
+currentUser.uid
+)
+);
+
+const userData =
+userDoc.data();
+
+
+
+/* =========================
+   UPLOAD COVER
+========================= */
+
+const storageRef =
+ref(
+storage,
+"covers/" +
+Date.now() +
+file.name
+);
+
+await uploadBytes(
+storageRef,
+file
+);
+
+const coverURL =
+await getDownloadURL(
+storageRef
+);
+
+
+
+/* =========================
+   BUAT STORY
+========================= */
+
+const storyRef =
+await addDoc(
+collection(db,"stories"),
+{
+
+title:title,
+
+cover:coverURL,
+
+author:userData.username,
+
+uid:currentUser.uid,
+
+createdAt:Date.now()
+
+}
+);
+
+
+
+/* =========================
+   BUAT CHAPTER PERTAMA
+========================= */
+
+await addDoc(
+collection(
+db,
+"stories",
+storyRef.id,
+"chapters"
+),
+{
+
+title:chapterTitle,
+
+content:content,
+
+chapterNumber:1,
+
+createdAt:Date.now()
+
+}
+);
+
+
+
+alert("Novel berhasil dipublish!");
+
+window.location.href =
+"story.html?id=" + storyRef.id;
+
+
+
+}catch(err){
+
+alert(err.message);
+
+console.error(err);
+
+}
+
+};
+
+</script>
+
+</body>
+</html>

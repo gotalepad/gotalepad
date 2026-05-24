@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Baca Cerita</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<header class="navbar">
+
+<div class="logo">
+Gotalepad
+</div>
+
+<nav>
+<a href="index.html">Home</a>
+<a href="write.html">Tulis</a>
+</nav>
+
+</header>
+
+<div class="read-container">
+
+<img id="storyCover" class="read-cover">
+
+<h1 id="storyTitle"></h1>
+
+<p class="author-name" id="authorName"></p>
+
+<div class="story-content" id="storyContent"></div>
+
+</div>
+
+<script type="module">
+
+import { db }
+from './firebase.js';
+
+import {
+doc,
+getDoc
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const params =
+new URLSearchParams(window.location.search);
+
+const id = params.get("id");
+
+async function loadStory(){
+
+const docRef =
+doc(db,"stories",id);
+
+const snap =
+await getDoc(docRef);
+
+if(snap.exists()){
+
+const data = snap.data();
+
+document.getElementById("storyTitle")
+.innerText = data.title;
+
+document.getElementById("storyContent")
+.innerText = data.content;
+
+document.getElementById("authorName")
+.innerText =
+"Penulis: " + data.author;
+
+document.getElementById("storyCover")
+.src = data.cover;
+
+}
+
+}
+
+loadStory();
+
+</script>
+
+</body>
+</html>

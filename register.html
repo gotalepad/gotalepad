@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Register</title>
+
+<link rel="stylesheet"
+href="style.css">
+
+</head>
+
+<body>
+
+<div class="auth-container">
+
+<h1>Daftar Gotalepad</h1>
+
+<input
+type="email"
+id="email"
+placeholder="Email">
+
+<input
+type="password"
+id="password"
+placeholder="Password">
+
+<button id="registerBtn">
+
+Daftar
+
+</button>
+
+<p class="auth-switch">
+
+Sudah punya akun?
+
+<a href="login.html">
+Login
+</a>
+
+</p>
+
+</div>
+
+
+
+<script type="module">
+
+import { auth, db }
+from './js/firebase.js';
+
+import {
+createUserWithEmailAndPassword
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+doc,
+setDoc
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+
+
+const btn =
+document.getElementById(
+"registerBtn"
+);
+
+
+
+btn.onclick = async ()=>{
+
+const email =
+document
+.getElementById("email")
+.value;
+
+const password =
+document
+.getElementById("password")
+.value;
+
+
+
+if(!email || !password){
+
+alert("Lengkapi semua data!");
+
+return;
+
+}
+
+
+
+try{
+
+
+
+/* =========================
+   REGISTER FIREBASE AUTH
+========================= */
+
+const userCredential =
+await createUserWithEmailAndPassword(
+auth,
+email,
+password
+);
+
+const user =
+userCredential.user;
+
+
+
+/* =========================
+   SIMPAN USER DATABASE
+========================= */
+
+await setDoc(
+doc(db,"users",user.uid),
+{
+
+username:
+"writer_" +
+Math.floor(
+Math.random()*9999
+),
+
+bio:
+"Belum menambahkan bio.",
+
+avatar:
+"https://i.pravatar.cc/300",
+
+email:email,
+
+createdAt:
+Date.now()
+
+}
+);
+
+
+
+alert("Register berhasil!");
+
+
+
+/* =========================
+   MASUK KE PROFILE
+========================= */
+
+window.location.href =
+"profile.html";
+
+
+
+}catch(err){
+
+alert(err.message);
+
+console.error(err);
+
+}
+
+};
+
+</script>
+
+</body>
+</html>

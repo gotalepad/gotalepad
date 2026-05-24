@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Library</title>
+
+<link rel="stylesheet"
+href="style.css">
+
+</head>
+
+<body>
+
+<header class="navbar">
+
+<div class="logo">
+Gotalepad
+</div>
+
+<nav>
+
+<a href="index.html">
+Home
+</a>
+
+</nav>
+
+</header>
+
+<div class="trending">
+
+<h1 class="library-title">
+Library Saya
+</h1>
+<div
+class="story-container"
+id="libraryContainer">
+</div>
+
+</div>
+
+<script type="module">
+
+import { db, auth }
+from './js/firebase.js';
+
+import {
+onAuthStateChanged
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+collection,
+getDocs,
+doc,
+getDoc
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const container =
+document.getElementById("libraryContainer");
+
+onAuthStateChanged(auth,
+async(user)=>{
+
+if(!user){
+
+window.location.href =
+"login.html";
+
+return;
+
+}
+
+const snapshot =
+await getDocs(
+collection(
+db,
+"users",
+user.uid,
+"library"
+)
+);
+
+snapshot.forEach(async(item)=>{
+
+const storyDoc =
+await getDoc(
+doc(
+db,
+"stories",
+item.id
+)
+);
+
+if(storyDoc.exists()){
+
+const data =
+storyDoc.data();
+
+container.innerHTML += `
+
+<a href="story.html?id=${item.id}"
+class="story-link">
+
+<div class="story-card">
+
+<img src="${data.cover}">
+
+<div class="story-info">
+
+<h3>${data.title}</h3>
+
+<p>${data.author}</p>
+
+</div>
+
+</div>
+
+</a>
+
+`;
+
+}
+
+});
+
+});
+
+</script>
+
+</body>
+</html>

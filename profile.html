@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Profile</title>
+
+<link rel="stylesheet"
+href="style.css">
+
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+
+<header class="navbar">
+
+<div class="logo">
+ Gotalepad
+</div>
+
+<nav>
+
+<a href="index.html">
+Home
+</a>
+
+<a href="write.html">
+Tulis
+</a>
+
+<a href="library.html">
+Library
+</a>
+
+</nav>
+
+</header>
+
+
+
+<!-- PROFILE HEADER -->
+
+<section class="profile-banner">
+
+<div class="banner-overlay">
+
+<div class="profile-top">
+
+<div class="profile-avatar">
+
+<img
+src="https://i.pravatar.cc/300"
+id="profileAvatar">
+
+<label
+for="avatarInput"
+class="upload-avatar-btn">
+
+📷
+
+</label>
+
+<input
+type="file"
+id="avatarInput"
+hidden>
+
+</div>
+
+<div class="profile-info">
+
+<h1 id="profileUsername">
+Loading...
+</h1>
+
+<p class="profile-tag">
+Penulis Gotalepad
+</p>
+
+<p class="profile-bio">
+Bio
+</p>
+
+<div class="profile-stats">
+
+<div>
+<h3 id="storyCount">
+0
+</h3>
+<p>Cerita</p>
+</div>
+
+<div>
+<h3>
+0
+</h3>
+<p>Followers</p>
+</div>
+
+<div>
+<h3>
+0
+</h3>
+<p>Mengikuti</p>
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+
+
+<!-- MAIN CONTENT -->
+
+<div class="profile-layout">
+
+<!-- LEFT -->
+
+<div class="profile-left">
+
+<div class="section-title">
+
+<h2>Cerita Saya</h2>
+
+<a href="write.html">
+<button class="write-story-btn">
+
++ Tulis Cerita
+
+</button>
+</a>
+
+</div>
+
+<div
+class="story-container"
+id="profileStories">
+
+</div>
+
+</div>
+
+
+
+<!-- RIGHT -->
+
+<div class="profile-right">
+
+<div class="about-card">
+
+<h3>Tentang Penulis</h3>
+
+<p>
+Halo! Selamat datang di profile
+Gotalepad saya 
+</p>
+
+<button class="edit-profile-btn">
+
+Edit Profile
+
+</button>
+
+</div>
+
+
+
+<div class="achievement-card">
+
+<h3>Pencapaian</h3>
+
+<div class="achievement-item">
+
+🏆 Penulis Aktif
+
+</div>
+
+<div class="achievement-item">
+
+🔥 Rising Writer
+
+</div>
+
+<div class="achievement-item">
+
+⭐ Cerita Populer
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<script type="module">
+
+import { auth, db }
+from './js/firebase.js';
+
+import {
+onAuthStateChanged
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+doc,
+getDoc,
+updateDoc,
+collection,
+getDocs,
+query,
+where
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import {
+getStorage,
+ref,
+uploadBytes,
+getDownloadURL
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+
+const username =
+document.getElementById(
+"profileUsername"
+);
+
+const storyCount =
+document.getElementById(
+"storyCount"
+);
+
+const profileStories =
+document.getElementById(
+"profileStories"
+);
+const storage =
+getStorage();
+
+
+let currentUser = null;
+onAuthStateChanged(auth,
+async(user)=>{
+
+    currentUser = user;
+if(!user){
+
+window.location.href =
+"login.html";
+
+return;
+
+}
+
+
+
+const userDoc =
+await getDoc(
+doc(db,"users",user.uid)
+);
+
+const userData =
+userDoc.data();
+
+
+
+username.innerText =
+userData.username;
+if(userData.avatar){
+
+document
+.getElementById("profileAvatar")
+.src =
+userData.avatar;
+
+}
+
+
+
+const q =
+query(
+collection(db,"stories"),
+where("uid","==",user.uid)
+);
+
+
+
+const querySnapshot =
+await getDocs(q);
+
+
+
+storyCount.innerText =
+querySnapshot.size;
+
+
+
+querySnapshot.forEach((docItem)=>{
+
+const data =
+docItem.data();
+
+profileStories.innerHTML += `
+
+<a href="story.html?id=${docItem.id}"
+class="story-link">
+
+<div class="story-card">
+
+<img src="${data.cover}">
+
+<div class="story-info">
+
+<h3>${data.title}</h3>
+
+<p>${data.author}</p>
+
+</div>
+
+</div>
+
+</a>
+
+`;
+
+});
+document
+.getElementById("avatarInput")
+.onchange = async (e)=>{
+
+const file =
+e.target.files[0];
+
+if(!file) return;
+
+
+
+try{
+
+
+
+const storageRef =
+ref(
+storage,
+"avatars/" +
+currentUser.uid
+);
+
+
+
+await uploadBytes(
+storageRef,
+file
+);
+
+
+
+const avatarURL =
+await getDownloadURL(
+storageRef
+);
+
+
+
+await updateDoc(
+doc(
+db,
+"users",
+currentUser.uid
+),
+{
+avatar:avatarURL
+}
+);
+
+
+
+document
+.getElementById("profileAvatar")
+.src =
+avatarURL;
+
+
+
+alert("Avatar berhasil diupdate!");
+
+
+
+}catch(err){
+
+alert(err.message);
+
+}
+
+};
+
+});
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<link rel="stylesheet"
+href="style.css">
+
+</head>
+
+<body>
+
+<div class="write-container">
+
+<h1>Tambah Chapter</h1>
+
+<input
+type="text"
+id="chapterTitle"
+placeholder="Judul Chapter">
+
+<textarea
+id="content"
+placeholder="Isi chapter..."
+></textarea>
+
+<button id="publishBtn">
+Publish Chapter
+</button>
+
+</div>
+
+<script type="module">
+
+import { db }
+from './js/firebase.js';
+
+import {
+collection,
+addDoc,
+getDocs
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const params =
+new URLSearchParams(window.location.search);
+
+const storyId =
+params.get("id");
+
+document
+.getElementById("publishBtn")
+.onclick = async ()=>{
+
+const title =
+document.getElementById("chapterTitle").value;
+
+const content =
+document.getElementById("content").value;
+
+const snapshot =
+await getDocs(
+collection(
+db,
+"stories",
+storyId,
+"chapters"
+)
+);
+
+const nextChapter =
+snapshot.size + 1;
+
+await addDoc(
+collection(
+db,
+"stories",
+storyId,
+"chapters"
+),
+{
+title:title,
+content:content,
+chapterNumber:nextChapter,
+createdAt:Date.now()
+}
+);
+
+alert("Chapter berhasil dipublish!");
+
+window.location.href =
+`story.html?id=${storyId}`;
+
+};
+
+</script>
+
+</body>
+</html>

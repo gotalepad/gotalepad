@@ -1,111 +1,404 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Novel Website</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #111;
-            color: white;
-        }
 
-        header {
-            background: #1e1e1e;
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+<meta charset="UTF-8">
 
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-            color: orange;
-        }
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
-        nav a {
-            color: white;
-            margin-left: 20px;
-            text-decoration: none;
-        }
+<title>Gotalepad</title>
 
-        .hero {
-            text-align: center;
-            padding: 80px 20px;
-        }
+<link rel="stylesheet"
+href="style.css">
 
-        .hero h1 {
-            font-size: 50px;
-        }
-
-        .hero button {
-            padding: 15px 30px;
-            background: orange;
-            border: none;
-            color: black;
-            font-size: 18px;
-            cursor: pointer;
-            border-radius: 8px;
-        }
-
-        .novels {
-            padding: 40px;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-        }
-
-        .card {
-            background: #222;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-
-        footer {
-            text-align: center;
-            padding: 30px;
-            background: #1e1e1e;
-        }
-    </style>
 </head>
+
 <body>
 
-<header>
-    <div class="logo">Gotalepad</div>
-    <nav>
-        <a href="#">Home</a>
-        <a href="#">Login</a>
-        <a href="#">Register</a>
-        <a href="#">Penulis</a>
-    </nav>
+
+
+<!-- NAVBAR -->
+
+<header class="topbar">
+
+<div class="logo">
+Gotalepad
+</div>
+
+
+
+<div class="search-box">
+
+<input
+type="text"
+id="searchInput"
+placeholder="Cari cerita...">
+
+</div>
+
+
+
+<nav>
+
+<a href="write.html">
+Tulis
+</a>
+
+<a href="library.html">
+Library
+</a>
+
+<a href="profile.html">
+Profile
+</a>
+
+</nav>
+
 </header>
 
-<section class="hero">
-    <h1>Baca Novel & Dukung Penulis</h1>
-    <p>Platform novel online dengan donasi untuk penulis</p>
-    <button>Mulai Membaca</button>
+
+
+<!-- HERO BANNER -->
+
+<section class="hero-slider">
+
+<div class="hero-content">
+
+<h1>
+Lebih banyak kategori,
+lebih mudah eksis
+</h1>
+
+<p>
+Bagikan cerita terbaikmu
+di Gotalepad 
+</p>
+
+<button>
+Mulai Membaca
+</button>
+
+</div>
+
 </section>
 
-<section class="novels">
-    <h2>Novel Populer</h2>
-    <div class="grid">
-        <div class="card">Novel 1</div>
-        <div class="card">Novel 2</div>
-        <div class="card">Novel 3</div>
-        <div class="card">Novel 4</div>
-    </div>
+
+
+<!-- TRENDING STORIES -->
+
+<section class="home-section">
+
+<div class="section-header">
+
+<h2>Trending Stories</h2>
+
+</div>
+
+<div
+class="story-row"
+id="storyContainer">
+
+</div>
+
 </section>
 
-<footer>
-    © 2026 GoTalePad
-</footer>
+
+
+<!-- CATEGORY -->
+
+<section class="home-section">
+
+<div class="section-header">
+
+<h2>Kategori Populer</h2>
+
+</div>
+
+<div class="category-row">
+
+<div class="category-card">
+Romance
+</div>
+
+<div class="category-card">
+Fantasy
+</div>
+
+<div class="category-card">
+Horror
+</div>
+
+<div class="category-card">
+Fanfiction
+</div>
+
+<div class="category-card">
+Teen Fiction
+</div>
+
+<div class="category-card">
+Action
+</div>
+
+</div>
+
+</section>
+
+
+
+<!-- CERITA BARU -->
+
+<section class="home-section">
+
+<div class="section-header">
+
+<h2>Cerita Baru</h2>
+
+</div>
+
+<div
+class="story-row"
+id="newStories">
+
+</div>
+
+</section>
+
+
+
+
+
+<script type="module">
+
+import { db }
+from './js/firebase.js';
+
+import {
+collection,
+getDocs,
+query,
+orderBy,
+limit
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+
+
+const container =
+document.getElementById(
+"storyContainer"
+);
+
+const newStories =
+document.getElementById(
+"newStories"
+);
+
+const searchInput =
+document.getElementById(
+"searchInput"
+);
+
+
+
+let allStories = [];
+
+
+
+/* =========================
+   RENDER STORIES
+========================= */
+
+function renderStories(stories){
+
+container.innerHTML = "";
+
+stories.forEach((story)=>{
+
+container.innerHTML += `
+
+<a
+href="story.html?id=${story.id}"
+class="story-link">
+
+<div class="modern-story-card">
+
+<img src="${story.cover}">
+
+<div class="modern-story-info">
+
+<h3>${story.title}</h3>
+
+<p>${story.author}</p>
+
+</div>
+
+</div>
+
+</a>
+
+`;
+
+});
+
+}
+
+
+
+/* =========================
+   LOAD STORIES
+========================= */
+
+async function loadStories(){
+
+try{
+
+
+
+allStories = [];
+
+container.innerHTML = "";
+
+newStories.innerHTML = "";
+
+
+
+const q =
+query(
+collection(db,"stories"),
+orderBy("createdAt","desc"),
+limit(12)
+);
+
+
+
+const querySnapshot =
+await getDocs(q);
+
+
+
+
+
+querySnapshot.forEach((docItem)=>{
+
+const story = {
+
+id:docItem.id,
+
+...docItem.data()
+
+};
+
+
+
+allStories.push(story);
+
+});
+
+
+
+/* =========================
+   TRENDING STORIES
+========================= */
+
+renderStories(allStories);
+
+
+
+/* =========================
+   CERITA BARU
+========================= */
+
+allStories.forEach((story)=>{
+
+newStories.innerHTML += `
+
+<a
+href="story.html?id=${story.id}"
+class="story-link">
+
+<div class="modern-story-card">
+
+<img src="${story.cover}">
+
+<div class="modern-story-info">
+
+<h3>${story.title}</h3>
+
+<p>${story.author}</p>
+
+</div>
+
+</div>
+
+</a>
+
+`;
+
+});
+
+
+
+}catch(err){
+
+console.error(err);
+
+alert(err.message);
+
+}
+
+}
+
+
+
+/* =========================
+   SEARCH REALTIME
+========================= */
+
+searchInput.oninput = (e)=>{
+
+const keyword =
+e.target.value
+.toLowerCase();
+
+
+
+const filteredStories =
+allStories.filter((story)=>{
+
+return(
+
+story.title
+.toLowerCase()
+.includes(keyword)
+
+||
+
+story.author
+.toLowerCase()
+.includes(keyword)
+
+);
+
+});
+
+
+
+renderStories(filteredStories);
+
+};
+
+
+
+/* =========================
+   START
+========================= */
+
+loadStories();
+
+</script>
 
 </body>
 </html>
