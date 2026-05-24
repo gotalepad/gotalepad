@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+  content="width=device-width, initial-scale=1.0">
+
+  <title>Tambah Chapter - Gotalepad</title>
+
+  <link rel="stylesheet"
+  href="style.css">
+</head>
+<body>
+
+<!-- NAVBAR -->
+<header class="wp-navbar">
+
+  <div class="wp-left">
+
+    <a href="index.html"
+    class="wp-logo">
+
+      Gotalepad
+
+    </a>
+
+    <a href="#"
+    class="wp-menu">
+
+      Jelajahi ▾
+
+    </a>
+
+    <a href="#"
+    class="wp-menu">
+
+      Komunitas ▾
+
+    </a>
+
+  </div>
+
+  <div class="wp-search">
+
+    <span>⌕</span>
+
+    <input
+    type="text"
+    placeholder="Cari">
+
+  </div>
+
+  <div class="wp-right">
+
+    <a href="profile.html"
+    class="avatar-btn">
+
+      <img
+      src="https://i.pravatar.cc/100">
+
+    </a>
+
+  </div>
+
+</header>
+
+<!-- PAGE -->
+<main class="write-page">
+
+  <!-- LEFT -->
+  <section class="write-left">
+
+    <div class="write-card">
+
+      <h1>
+        Tambah Chapter
+      </h1>
+
+      <p class="write-subtitle">
+        Lanjutkan cerita kamu
+      </p>
+
+      <!-- STORY INFO -->
+      <div class="story-mini-info">
+
+        <img
+        id="storyCover"
+        src="https://via.placeholder.com/120x180">
+
+        <div>
+
+          <h2 id="storyTitle">
+            Loading...
+          </h2>
+
+          <p id="storyAuthor">
+            Penulis
+          </p>
+
+        </div>
+
+      </div>
+
+      <!-- CHAPTER TITLE -->
+      <div class="input-group">
+
+        <label>
+          Judul Chapter
+        </label>
+
+        <input
+        type="text"
+        id="chapterTitle"
+        placeholder="Masukkan judul chapter">
+
+      </div>
+
+      <!-- CONTENT -->
+      <div class="input-group">
+
+        <label>
+          Isi Chapter
+        </label>
+
+        <textarea
+        id="chapterContent"
+        class="big-editor"
+        placeholder="Mulai menulis..."
+        rows="18"></textarea>
+
+      </div>
+
+      <!-- BUTTON -->
+      <button
+      id="publishBtn"
+      class="publish-btn">
+
+        Publish Chapter
+
+      </button>
+
+    </div>
+
+  </section>
+
+  <!-- RIGHT -->
+  <aside class="write-right">
+
+    <div class="tips-card">
+
+      <h2>
+        Tips Menulis
+      </h2>
+
+      <ul>
+
+        <li>
+          Gunakan paragraf pendek
+        </li>
+
+        <li>
+          Buat cliffhanger menarik
+        </li>
+
+        <li>
+          Konsisten upload chapter
+        </li>
+
+        <li>
+          Periksa typo sebelum publish
+        </li>
+
+      </ul>
+
+    </div>
+
+    <div class="preview-card">
+
+      <h2>
+        Preview Chapter
+      </h2>
+
+      <h3 id="previewTitle">
+        Judul Chapter
+      </h3>
+
+      <p id="previewContent">
+        Isi chapter...
+      </p>
+
+    </div>
+
+  </aside>
+
+</main>
+
+<script type="module">
+
+import { auth, db }
+from "./js/firebase.js";
+
+import {
+  onAuthStateChanged
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+  doc,
+  getDoc,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  where,
+  orderBy,
+  serverTimestamp
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* =========================
+   GET STORY ID
+========================= */
+
+const params =
+new URLSearchParams(
+window.location.search
+);
+
+const storyId =
+params.get("id");
+
+/* =========================
+   ELEMENTS
+========================= */
+
+const storyTitleEl =
+document.getElementById(
+"storyTitle"
+);
+
+const storyAuthorEl =
+document.getElementById(
+"storyAuthor"
+);
+
+const storyCoverEl =
+document.getElementById(
+"storyCover"
+);
+
+const chapterTitleInput =
+document.getElementById(
+"chapterTitle"
+);
+
+const chapterContentInput =
+document.getElementById(
+"chapterContent"
+);
+
+const previewTitle =
+document.getElementById(
+"previewTitle"
+);
+
+const previewContent =
+document.getElementById(
+"previewContent"
+);
+
+let currentUser = null;
+let storyData = null;
+
+/* =========================
+   AUTH
+========================= */
+
+onAuthStateChanged(auth,
+(user)=>{
+
+if(!user){
+
+window.location.href =
+"login.html";
+
+return;
+
+}
+
+currentUser = user;
+
+loadStory();
+
+});
+
+/* =========================
+   LOAD STORY
+========================= */
+
+async function loadStory(){
+
+if(!storyId){
+
+window.location.href =
+"index.html";
+
+return;
+
+}
+
+try{
+
+const storyRef =
+doc(
+db,
+"stories",
+storyId
+);
+
+const snap =
+await getDoc(storyRef);
+
+if(!snap.exists()){
+
+alert(
+"Story tidak ditemukan"
+);
+
+window.location.href =
+"index.html";
+
+return;
+
+}
+
+storyData =
+snap.data();
+
+storyTitleEl.innerText =
+storyData.title;
+
+storyAuthorEl.innerText =
+storyData.author ||
+storyData.email;
+
+storyCoverEl.src =
+storyData.cover ||
+"https://via.placeholder.com/120x180";
+
+}catch(err){
+
+console.error(err);
+
+alert(err.message);
+
+}
+
+}
+
+/* =========================
+   PREVIEW
+========================= */
+
+chapterTitleInput.oninput =
+()=>{
+
+previewTitle.innerText =
+chapterTitleInput.value ||
+"Judul Chapter";
+
+};
+
+chapterContentInput.oninput =
+()=>{
+
+previewContent.innerText =
+chapterContentInput.value
+.substring(0,300) ||
+"Isi chapter...";
+
+};
+
+/* =========================
+   PUBLISH CHAPTER
+========================= */
+
+document
+.getElementById("publishBtn")
+.onclick = async ()=>{
+
+const title =
+chapterTitleInput.value;
+
+const content =
+chapterContentInput.value;
+
+if(!title || !content){
+
+alert(
+"Lengkapi semua data!"
+);
+
+return;
+
+}
+
+try{
+
+/* =========================
+   GET TOTAL CHAPTER
+========================= */
+
+const q =
+query(
+collection(db,"chapters"),
+where(
+"storyId",
+"==",
+storyId
+),
+orderBy(
+"chapterNumber",
+"asc"
+)
+);
+
+const snapshot =
+await getDocs(q);
+
+const nextChapter =
+snapshot.size + 1;
+
+/* =========================
+   CREATE CHAPTER
+========================= */
+
+await addDoc(
+collection(db,"chapters"),
+{
+
+storyId:
+storyId,
+
+title:
+title,
+
+content:
+content,
+
+chapterNumber:
+nextChapter,
+
+createdAt:
+serverTimestamp()
+
+}
+);
+
+alert(
+"Chapter berhasil dipublish!"
+);
+
+window.location.href =
+"story.html?id=" +
+storyId;
+
+}catch(err){
+
+console.error(err);
+
+alert(err.message);
+
+}
+
+};
+
+</script>
+
+</body>
+</html>

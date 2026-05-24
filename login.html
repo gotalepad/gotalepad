@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+  content="width=device-width, initial-scale=1.0">
+
+  <title>Login - Gotalepad</title>
+
+  <link rel="stylesheet"
+  href="style.css">
+</head>
+<body class="auth-body">
+
+<!-- NAVBAR -->
+<header class="wp-navbar">
+
+  <div class="wp-left">
+
+    <a href="index.html"
+    class="wp-logo">
+
+      Gotalepad
+
+    </a>
+
+  </div>
+
+  <div class="wp-right">
+
+    <a href="register.html"
+    class="auth-nav-btn">
+
+      Daftar
+
+    </a>
+
+  </div>
+
+</header>
+
+<!-- LOGIN PAGE -->
+<main class="auth-page">
+
+  <!-- LEFT -->
+  <section class="auth-left">
+
+    <div class="auth-left-content">
+
+      <h1>
+        Selamat Datang
+        di Gotalepad
+      </h1>
+
+      <p>
+        Baca jutaan cerita,
+        tulis novelmu sendiri,
+        dan bangun komunitas pembaca.
+      </p>
+
+      <div class="auth-features">
+
+        <div class="feature-item">
+
+          📚
+          <span>
+            Baca cerita tanpa batas
+          </span>
+
+        </div>
+
+        <div class="feature-item">
+
+          ✍️
+          <span>
+            Tulis novelmu sendiri
+          </span>
+
+        </div>
+
+        <div class="feature-item">
+
+          🌎
+          <span>
+            Bangun komunitas pembaca
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- RIGHT -->
+  <section class="auth-right">
+
+    <div class="auth-card">
+
+      <h2>
+        Login
+      </h2>
+
+      <p class="auth-subtitle">
+        Masuk untuk melanjutkan
+      </p>
+
+      <!-- EMAIL -->
+      <div class="input-group">
+
+        <label>
+          Email
+        </label>
+
+        <input
+        type="email"
+        id="email"
+        placeholder="Masukkan email">
+
+      </div>
+
+      <!-- PASSWORD -->
+      <div class="input-group">
+
+        <label>
+          Password
+        </label>
+
+        <input
+        type="password"
+        id="password"
+        placeholder="Masukkan password">
+
+      </div>
+
+      <!-- BUTTON -->
+      <button
+      id="loginBtn"
+      class="auth-btn">
+
+        Login
+
+      </button>
+
+      <p class="switch-auth">
+
+        Belum punya akun?
+
+        <a href="register.html">
+          Daftar
+        </a>
+
+      </p>
+
+    </div>
+
+  </section>
+
+</main>
+
+<script type="module">
+
+import { auth }
+from "./js/firebase.js";
+
+import {
+  signInWithEmailAndPassword
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const loginBtn =
+document.getElementById(
+"loginBtn"
+);
+
+loginBtn.onclick =
+async ()=>{
+
+const email =
+document.getElementById(
+"email"
+).value;
+
+const password =
+document.getElementById(
+"password"
+).value;
+
+if(!email || !password){
+
+alert(
+"Lengkapi semua data!"
+);
+
+return;
+
+}
+
+try{
+
+await signInWithEmailAndPassword(
+auth,
+email,
+password
+);
+
+alert(
+"Login berhasil!"
+);
+
+window.location.href =
+"index.html";
+
+}catch(err){
+
+console.error(err);
+
+alert(
+"Email atau password salah!"
+);
+
+}
+
+};
+
+</script>
+
+</body>
+</html>

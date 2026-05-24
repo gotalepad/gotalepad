@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil - Gotalepad</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="wp-navbar">
+  <div class="wp-left">
+    <a href="index.html" class="wp-logo">Gotalepad</a>
+
+    <a href="#" class="wp-menu">Jelajahi ▾</a>
+    <a href="#" class="wp-menu">Komunitas ▾</a>
+  </div>
+
+  <div class="wp-search">
+    <span>⌕</span>
+    <input type="text" placeholder="Cari">
+  </div>
+
+  <div class="wp-right">
+    <a href="write.html" class="wp-menu">Tulis ▾</a>
+
+    <a href="#" class="premium-btn">
+      ⚡ Coba Premium
+    </a>
+
+    <button id="logoutBtn" class="profile-btn">
+      Keluar
+    </button>
+  </div>
+</header>
+
+<main class="profile-page">
+
+  <!-- PROFILE HEADER -->
+  <section class="profile-header">
+
+    <div class="profile-cover"></div>
+
+    <div class="profile-top">
+
+      <img
+        id="profileAvatar"
+        src="https://i.pravatar.cc/300"
+        class="profile-avatar"
+      >
+
+      <div class="profile-info">
+
+        <h1 id="profileUsername">
+          Loading...
+        </h1>
+
+        <p id="profileBio">
+          Penulis di Gotalepad
+        </p>
+
+        <div class="profile-stats">
+
+          <div>
+            <strong id="storyCount">0</strong>
+            <span>Karya</span>
+          </div>
+
+          <div>
+            <strong>0</strong>
+            <span>Daftar Bacaan</span>
+          </div>
+
+          <div>
+            <strong>0</strong>
+            <span>Pengikut</span>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- PROFILE MENU -->
+  <section class="profile-tabs">
+
+    <button class="tab-btn active">
+      Karya
+    </button>
+
+    <button class="tab-btn">
+      Daftar Bacaan
+    </button>
+
+    <button class="tab-btn">
+      Tentang
+    </button>
+
+  </section>
+
+  <!-- STORIES -->
+  <section class="profile-stories">
+
+    <div class="section-header">
+      <h2>Cerita Saya</h2>
+
+      <a href="write.html" class="write-story-btn">
+        + Tulis Cerita
+      </a>
+    </div>
+
+    <div id="profileStories" class="story-grid">
+
+      <!-- stories -->
+
+    </div>
+
+  </section>
+
+</main>
+
+<script type="module">
+
+import { auth, db }
+from "./js/firebase.js";
+
+import {
+  onAuthStateChanged,
+  signOut
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+  doc,
+  getDoc,
+  collection,
+  getDocs,
+  query,
+  where
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const usernameEl =
+document.getElementById(
+"profileUsername"
+);
+
+const bioEl =
+document.getElementById(
+"profileBio"
+);
+
+const avatarEl =
+document.getElementById(
+"profileAvatar"
+);
+
+const storyCountEl =
+document.getElementById(
+"storyCount"
+);
+
+const storiesContainer =
+document.getElementById(
+"profileStories"
+);
+
+const logoutBtn =
+document.getElementById(
+"logoutBtn"
+);
+
+/* =========================
+   AUTH
+========================= */
+
+onAuthStateChanged(auth,
+async(user)=>{
+
+if(!user){
+
+window.location.href =
+"login.html";
+
+return;
+
+}
+
+loadProfile(user);
+
+loadStories(user.uid);
+
+});
+
+/* =========================
+   LOAD PROFILE
+========================= */
+
+async function loadProfile(user){
+
+try{
+
+const userRef =
+doc(
+db,
+"users",
+user.uid
+);
+
+const snap =
+await getDoc(userRef);
+
+if(snap.exists()){
+
+const data =
+snap.data();
+
+usernameEl.innerText =
+data.username ||
+"Gotalepad Writer";
+
+bioEl.innerText =
+data.bio ||
+"Belum ada bio.";
+
+if(data.avatar){
+
+avatarEl.src =
+data.avatar;
+
+}
+
+}else{
+
+usernameEl.innerText =
+user.email;
+
+}
+
+}catch(err){
+
+console.error(err);
+
+}
+
+}
+
+/* =========================
+   LOAD STORIES
+========================= */
+
+async function loadStories(uid){
+
+storiesContainer.innerHTML =
+"Loading...";
+
+try{
+
+const q =
+query(
+collection(db,"stories"),
+where("uid","==",uid)
+);
+
+const querySnapshot =
+await getDocs(q);
+
+storyCountEl.innerText =
+querySnapshot.size;
+
+storiesContainer.innerHTML =
+"";
+
+if(querySnapshot.empty){
+
+storiesContainer.innerHTML = `
+
+<p class="empty-text">
+Belum ada cerita.
+</p>
+
+`;
+
+return;
+
+}
+
+querySnapshot.forEach((docItem)=>{
+
+const story =
+docItem.data();
+
+storiesContainer.innerHTML += `
+
+<a
+href="story.html?id=${docItem.id}"
+class="story-link">
+
+<div class="wp-story-card">
+
+<img
+src="${
+story.cover ||
+'https://via.placeholder.com/300x450?text=No+Cover'
+}">
+
+<div class="wp-story-info">
+
+<h3>
+${story.title}
+</h3>
+
+<p>
+${story.author || story.email}
+</p>
+
+<span>
+👁 0
+</span>
+
+</div>
+
+</div>
+
+</a>
+
+`;
+
+});
+
+}catch(err){
+
+console.error(err);
+
+storiesContainer.innerHTML =
+"Gagal memuat cerita.";
+
+}
+
+}
+
+/* =========================
+   LOGOUT
+========================= */
+
+logoutBtn.onclick =
+async ()=>{
+
+await signOut(auth);
+
+window.location.href =
+"login.html";
+
+};
+
+</script>
+
+</body>
+</html>
