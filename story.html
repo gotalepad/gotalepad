@@ -1,300 +1,247 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-
-<meta charset="UTF-8">
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
-<title>Novel</title>
-
-<link rel="stylesheet" href="style.css">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detail Cerita - Gotalepad</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<header class="navbar">
+<header class="wp-navbar">
+  <div class="wp-left">
+    <a href="index.html" class="wp-logo">Gotalepad</a>
+    <a href="#" class="wp-menu">Jelajahi ▾</a>
+    <a href="#" class="wp-menu">Komunitas ▾</a>
+  </div>
 
-<div class="logo">
-Gotalepad
-</div>
+  <div class="wp-search">
+    <span>⌕</span>
+    <input type="text" placeholder="Cari">
+  </div>
 
-<nav>
-<a href="index.html">Home</a>
-<a href="write.html">Tulis</a>
-</nav>
-
+  <div class="wp-right">
+    <a href="write.html" class="wp-menu">Tulis ▾</a>
+    <a href="#" class="premium-btn">⚡ Coba Premium</a>
+    <a href="profile.html" class="avatar-btn">
+      <img src="https://i.pravatar.cc/100" alt="Profile">
+    </a>
+  </div>
 </header>
 
-<div class="story-detail">
+<main class="story-detail-page">
 
-<img id="storyCover">
+  <section class="story-hero-detail">
+    <div class="story-cover-box">
+      <img id="storyCover" src="https://via.placeholder.com/300x450?text=No+Cover" alt="Cover">
+    </div>
 
-<div class="story-meta">
+    <div class="story-detail-info">
+      <h1 id="storyTitle">Loading...</h1>
+      <p class="story-author">oleh <span id="storyAuthor">Penulis</span></p>
 
-<h1 id="storyTitle"></h1>
+      <div class="story-stats">
+        <div>
+          <strong id="readCount">0</strong>
+          <span>Dibaca</span>
+        </div>
+        <div>
+          <strong id="voteCount">0</strong>
+          <span>Vote</span>
+        </div>
+        <div>
+          <strong id="chapterCount">0</strong>
+          <span>Bagian</span>
+        </div>
+      </div>
 
-<p id="storyAuthor"></p>
-<div class="story-actions">
+      <div class="story-actions">
+        <button id="startReadBtn" class="primary-read-btn">Mulai Membaca</button>
+        <button id="libraryBtn" class="secondary-btn">＋ Library</button>
+        <button id="voteBtn" class="secondary-btn">⭐ Vote</button>
+      </div>
 
-<button id="likeBtn">
-❤️ Vote
-</button>
+      <p id="storyDescription" class="story-description">
+        Memuat deskripsi cerita...
+      </p>
 
-<button id="bookmarkBtn">
- Library
-</button>
+      <div class="tag-row">
+        <span>romance</span>
+        <span>fantasy</span>
+        <span>remaja</span>
+      </div>
+    </div>
+  </section>
 
-<p id="likeCount">
-0 votes
-</p>
+  <section class="chapter-panel">
+    <div class="chapter-header">
+      <h2>Daftar Bagian</h2>
+      <a id="addChapterLink" href="#">+ Tambah Chapter</a>
+    </div>
 
-</div>
+    <div id="chapterList" class="chapter-list">
+      Loading chapter...
+    </div>
+  </section>
 
-<button id="addChapterBtn">
-Tambah Chapter
-</button>
-
-</div>
-
-</div>
-
-<div class="chapter-list"
-id="chapterList">
-
-</div>
+</main>
 
 <script type="module">
-
-import { db, auth }
-from './js/firebase.js';
+import { auth, db } from "./js/firebase.js";
 
 import {
-doc,
-getDoc,
-collection,
-getDocs,
-query,
-orderBy,
-setDoc,
-deleteDoc
-}
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  doc,
+  getDoc,
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  setDoc,
+  deleteDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 import {
-onAuthStateChanged
-}
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-const params =
-new URLSearchParams(window.location.search);
+const params = new URLSearchParams(window.location.search);
+const storyId = params.get("id");
 
-const storyId =
-params.get("id");
+const storyCover = document.getElementById("storyCover");
+const storyTitle = document.getElementById("storyTitle");
+const storyAuthor = document.getElementById("storyAuthor");
+const storyDescription = document.getElementById("storyDescription");
+const chapterList = document.getElementById("chapterList");
+const chapterCount = document.getElementById("chapterCount");
+const voteCount = document.getElementById("voteCount");
+const startReadBtn = document.getElementById("startReadBtn");
+const addChapterLink = document.getElementById("addChapterLink");
+const libraryBtn = document.getElementById("libraryBtn");
+const voteBtn = document.getElementById("voteBtn");
+
 let currentUser = null;
+let chapters = [];
+let storyData = null;
 
-onAuthStateChanged(auth,
-(user)=>{
-
-currentUser = user;
-
+onAuthStateChanged(auth, (user) => {
+  currentUser = user;
 });
 
-async function loadStory(){
-
-const docRef =
-doc(db,"stories",storyId);
-
-const snap =
-await getDoc(docRef);
-
-if(snap.exists()){
-
-const data = snap.data();
-
-document.getElementById("storyTitle")
-.innerText = data.title;
-
-document.getElementById("storyAuthor")
-.innerText = "Penulis: " + data.author;
-
-document.getElementById("storyCover")
-.src = data.cover;
-
+if (!storyId) {
+  storyTitle.innerText = "Cerita tidak ditemukan";
+  chapterList.innerHTML = "";
+} else {
+  addChapterLink.href = `add-chapter.html?id=${storyId}`;
+  loadStory();
+  loadChapters();
+  loadVotes();
 }
 
+async function loadStory() {
+  const storyRef = doc(db, "stories", storyId);
+  const snap = await getDoc(storyRef);
+
+  if (!snap.exists()) {
+    storyTitle.innerText = "Cerita tidak ditemukan";
+    return;
+  }
+
+  storyData = snap.data();
+
+  storyTitle.innerText = storyData.title || "Tanpa Judul";
+  storyAuthor.innerText = storyData.author || storyData.email || "Penulis Gotalepad";
+  storyDescription.innerText = storyData.description || storyData.content || "Belum ada deskripsi.";
+  storyCover.src = storyData.cover || "https://via.placeholder.com/300x450?text=No+Cover";
 }
 
-async function loadChapters(){
+async function loadChapters() {
+  const q = query(
+    collection(db, "chapters"),
+    orderBy("chapterNumber", "asc")
+  );
 
-const chapterList =
-document.getElementById("chapterList");
+  const snapshot = await getDocs(q);
 
-chapterList.innerHTML = "";
+  chapters = [];
 
-const q =
-query(
-collection(
-db,
-"stories",
-storyId,
-"chapters"
-),
-orderBy("chapterNumber")
-);
+  snapshot.forEach((docItem) => {
+    const data = docItem.data();
+    if (data.storyId === storyId) {
+      chapters.push({
+        id: docItem.id,
+        ...data
+      });
+    }
+  });
 
-const querySnapshot =
-await getDocs(q);
+  chapterCount.innerText = chapters.length;
+  chapterList.innerHTML = "";
 
-querySnapshot.forEach((doc)=>{
+  if (chapters.length === 0) {
+    chapterList.innerHTML = "<p>Belum ada chapter.</p>";
+    startReadBtn.disabled = true;
+    return;
+  }
 
-const data = doc.data();
+  startReadBtn.onclick = () => {
+    window.location.href = `chapter.html?storyId=${storyId}&chapterId=${chapters[0].id}`;
+  };
 
-chapterList.innerHTML += `
-
-<a
-href="chapter.html?story=${storyId}&chapter=${doc.id}"
-class="chapter-card">
-
-<h3>
-Chapter ${data.chapterNumber}
-</h3>
-
-<p>${data.title}</p>
-
-</a>
-
-`;
-
-});
-
+  chapters.forEach((chapter) => {
+    chapterList.innerHTML += `
+      <a class="chapter-item" href="chapter.html?storyId=${storyId}&chapterId=${chapter.id}">
+        <div>
+          <h3>Bagian ${chapter.chapterNumber}: ${chapter.title}</h3>
+          <p>${chapter.content ? chapter.content.substring(0, 120) + "..." : ""}</p>
+        </div>
+        <span>›</span>
+      </a>
+    `;
+  });
 }
 
-document
-.getElementById("addChapterBtn")
-.onclick = ()=>{
+async function loadVotes() {
+  const votes = await getDocs(collection(db, "stories", storyId, "votes"));
+  voteCount.innerText = votes.size;
+}
 
-window.location.href =
-`addchapter.html?id=${storyId}`;
+voteBtn.onclick = async () => {
+  if (!currentUser) {
+    window.location.href = "login.html";
+    return;
+  }
 
+  const voteRef = doc(db, "stories", storyId, "votes", currentUser.uid);
+  const voteSnap = await getDoc(voteRef);
+
+  if (voteSnap.exists()) {
+    await deleteDoc(voteRef);
+  } else {
+    await setDoc(voteRef, {
+      uid: currentUser.uid,
+      createdAt: Date.now()
+    });
+  }
+
+  loadVotes();
 };
 
-async function loadLikes(){
+libraryBtn.onclick = async () => {
+  if (!currentUser) {
+    window.location.href = "login.html";
+    return;
+  }
 
-const likesSnapshot =
-await getDocs(
-collection(
-db,
-"stories",
-storyId,
-"likes"
-)
-);
+  await setDoc(
+    doc(db, "users", currentUser.uid, "library", storyId),
+    {
+      storyId: storyId,
+      savedAt: Date.now()
+    }
+  );
 
-document
-.getElementById("likeCount")
-.innerText =
-likesSnapshot.size + " votes";
-
-}
-
-document
-.getElementById("likeBtn")
-.onclick = async ()=>{
-    document
-.getElementById("bookmarkBtn")
-.onclick = async ()=>{
-
-if(!currentUser){
-
-alert("Login terlebih dahulu!");
-
-window.location.href =
-"login.html";
-
-return;
-
-}
-
-const bookmarkRef =
-doc(
-db,
-"users",
-currentUser.uid,
-"library",
-storyId
-);
-
-const bookmarkDoc =
-await getDoc(bookmarkRef);
-
-if(bookmarkDoc.exists()){
-
-await deleteDoc(bookmarkRef);
-
-alert("Dihapus dari library");
-
-}else{
-
-await setDoc(bookmarkRef,{
-storyId:storyId,
-savedAt:Date.now()
-});
-
-alert("Ditambahkan ke library!");
-
-}
-
+  alert("Ditambahkan ke Library!");
 };
-
-if(!currentUser){
-
-alert("Login terlebih dahulu!");
-
-window.location.href =
-"login.html";
-
-return;
-
-}
-
-const likeRef =
-doc(
-db,
-"stories",
-storyId,
-"likes",
-currentUser.uid
-);
-
-const likeDoc =
-await getDoc(likeRef);
-
-if(likeDoc.exists()){
-
-await deleteDoc(likeRef);
-
-}else{
-
-await setDoc(likeRef,{
-liked:true
-});
-
-}
-
-loadLikes();
-
-};
-}
-
-loadStory();
-
-loadChapters();
-
-loadLikes();
-
-
 </script>
 
 </body>

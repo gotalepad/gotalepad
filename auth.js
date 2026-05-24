@@ -1,186 +1,72 @@
-import { auth }
-from "./firebase.js";
+import { auth, db } from "./firebase.js";
 
 import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    onAuthStateChanged,
-    signOut
+import {
+  doc,
+  setDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-}
-from
-"https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+/* REGISTER */
+export async function registerUser(username, email, password) {
+  const userCredential = await createUserWithEmailAndPassword(
+    auth,
+    email,
+    password
+  );
 
+  const user = userCredential.user;
 
-// ELEMENT
+  await setDoc(doc(db, "users", user.uid), {
+    username: username,
+    email: email,
+    bio: "Penulis di Gotalepad",
+    avatar: "https://i.pravatar.cc/300",
+    createdAt: serverTimestamp()
+  });
 
-const registerBtn =
-document.getElementById("registerBtn");
-
-const loginBtn =
-document.getElementById("loginBtn");
-
-const logoutBtn =
-document.getElementById("logoutBtn");
-
-const homepage =
-document.getElementById("homepage");
-
-const registerBox =
-document.getElementById("registerBox");
-
-const loginBox =
-document.getElementById("loginBox");
-
-const userEmail =
-document.getElementById("userEmail");
-
-
-// REGISTER
-
-if(registerBtn){
-
-    registerBtn.onclick = ()=>{
-
-        const email =
-        document.getElementById("registerEmail").value;
-
-        const password =
-        document.getElementById("registerPassword").value;
-
-
-        createUserWithEmailAndPassword(
-            auth,
-            email,
-            password
-        )
-
-        .then(()=>{
-
-            alert("Register berhasil!");
-
-        })
-
-        .catch((error)=>{
-
-            alert(error.message);
-
-        });
-
-    };
-
+  return user;
 }
 
+/* LOGIN */
+export async function loginUser(email, password) {
+  const userCredential = await signInWithEmailAndPassword(
+    auth,
+    email,
+    password
+  );
 
-// LOGIN
-
-if(loginBtn){
-
-    loginBtn.onclick = ()=>{
-
-        const email =
-        document.getElementById("loginEmail").value;
-
-        const password =
-        document.getElementById("loginPassword").value;
-
-
-        signInWithEmailAndPassword(
-            auth,
-            email,
-            password
-        )
-
-        .then(()=>{
-
-            alert("Login berhasil!");
-
-        })
-
-        .catch((error)=>{
-
-            alert(error.message);
-
-        });
-
-    };
-
+  return userCredential.user;
 }
 
-
-// LOGOUT
-
-if(logoutBtn){
-
-    logoutBtn.onclick = ()=>{
-
-        signOut(auth);
-
-    };
-
+/* LOGOUT */
+export async function logoutUser() {
+  await signOut(auth);
 }
 
+/* CEK LOGIN */
+export function checkAuth(callback) {
+  onAuthStateChanged(auth, (user) => {
+    callback(user);
+  });
+}
 
-// AUTH STATE
-
-onAuthStateChanged(auth,(user)=>{
-
-    if(user){
-
-        if(homepage){
-
-            homepage.style.display =
-            "block";
-
-        }
-
-        if(registerBox){
-
-            registerBox.style.display =
-            "none";
-
-        }
-
-        if(loginBox){
-
-            loginBox.style.display =
-            "none";
-
-        }
-
-        if(userEmail){
-
-            userEmail.innerHTML =
-            user.email;
-
-        }
-
+/* WAJIB LOGIN */
+export function requireLogin() {
+  onAuthStateChanged(auth, (user) => {
+    if (!user) {
+      window.location.href = "login.html";
     }
+  });
+}
 
-    else{
-
-        if(homepage){
-
-            homepage.style.display =
-            "none";
-
-        }
-
-        if(registerBox){
-
-            registerBox.style.display =
-            "flex";
-
-        }
-
-        if(loginBox){
-
-            loginBox.style.display =
-            "flex";
-
-        }
-
-    }
-
-});
+/* AMBIL USER SEKARANG */
+export function getCurrentUser() {
+  return auth.currentUser;
+}

@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
 
 <meta charset="UTF-8">
@@ -17,54 +16,146 @@ href="style.css">
 
 <body>
 
+<!-- =========================
+     NAVBAR
+========================= -->
 
+<header class="wp-navbar">
 
-<!-- NAVBAR -->
+<div class="wp-left">
 
-<header class="topbar">
+<a href="index.html"
+class="wp-logo">
 
-<div class="logo">
 Gotalepad
+
+</a>
+
+<a href="#"
+class="wp-menu">
+
+Jelajahi ▾
+
+</a>
+
+<a href="#"
+class="wp-menu">
+
+Komunitas ▾
+
+</a>
+
 </div>
 
+<!-- SEARCH -->
 
+<div class="wp-search">
 
-<div class="search-box">
+<span>⌕</span>
 
 <input
 type="text"
 id="searchInput"
-placeholder="Cari cerita...">
+placeholder="Cari cerita, penulis...">
 
 </div>
 
+<!-- RIGHT -->
 
+<div class="wp-right">
 
-<nav>
+<a href="write.html"
+class="wp-menu">
 
-<a href="write.html">
-Tulis
+Tulis ▾
+
+</a>
+
+<a href="#"
+class="premium-btn">
+
+⚡ Coba Premium
+
+</a>
+
+<!-- PROFILE -->
+
+<div class="profile-dropdown">
+
+<button
+id="profileBtn"
+class="avatar-btn">
+
+<img
+id="navAvatar"
+src="https://i.pravatar.cc/100">
+
+<span>⌄</span>
+
+</button>
+
+<div
+id="profileMenu"
+class="dropdown-menu">
+
+<a href="profile.html">
+Profil saya
+</a>
+
+<hr>
+
+<a href="#">
+Kotak masuk
+</a>
+
+<a href="#">
+Pembaruan
 </a>
 
 <a href="library.html">
-Library
+Perpustakaan
 </a>
 
-<a href="profile.html">
-Profile
+<hr>
+
+<a href="#">
+Bahasa: Bahasa Indonesia
 </a>
 
-</nav>
+<a href="#">
+Bantuan
+</a>
+
+<a href="#">
+Pengaturan
+</a>
+
+<a href="#"
+id="logoutBtn">
+
+Keluar
+
+</a>
+
+</div>
+
+</div>
+
+</div>
 
 </header>
 
+<!-- =========================
+     HERO
+========================= -->
 
+<section class="hero-banner">
 
-<!-- HERO BANNER -->
+<button class="slider-btn left">
+‹
+</button>
 
-<section class="hero-slider">
-
-<div class="hero-content">
+<div class="hero-text">
 
 <h1>
 Lebih banyak kategori,
@@ -72,331 +163,226 @@ lebih mudah eksis
 </h1>
 
 <p>
-Bagikan cerita terbaikmu
-di Gotalepad 
+Tambahkan genre,
+subgenre,
+dan fandom
+ke ceritamu
 </p>
 
-<button>
-Mulai Membaca
+<a href="write.html"
+class="hero-btn">
+
+SELENGKAPNYA
+
+</a>
+
+</div>
+
+<div class="hero-art">
+
+<div class="circle-badge">
+
+YANG BARU
+UNTUK
+PENULIS
+
+</div>
+
+<div class="art-card orange">
+
+</div>
+
+<div class="art-card pink">
+
+</div>
+
+</div>
+
+<button class="slider-btn right">
+›
 </button>
 
-</div>
-
 </section>
 
+<!-- =========================
+     TRENDING
+========================= -->
 
+<section class="story-section">
 
-<!-- TRENDING STORIES -->
+<p class="section-subtitle">
+Cerita populer hari ini
+</p>
 
-<section class="home-section">
-
-<div class="section-header">
-
-<h2>Trending Stories</h2>
-
-</div>
+<h2>
+Trending Stories
+</h2>
 
 <div
 class="story-row"
-id="storyContainer">
+id="trendingStories">
 
 </div>
 
 </section>
 
+<!-- =========================
+     LATEST
+========================= -->
 
+<section class="story-section">
 
-<!-- CATEGORY -->
+<p class="section-subtitle">
+Cerita terbaru untukmu
+</p>
 
-<section class="home-section">
-
-<div class="section-header">
-
-<h2>Kategori Populer</h2>
-
-</div>
-
-<div class="category-row">
-
-<div class="category-card">
-Romance
-</div>
-
-<div class="category-card">
-Fantasy
-</div>
-
-<div class="category-card">
-Horror
-</div>
-
-<div class="category-card">
-Fanfiction
-</div>
-
-<div class="category-card">
-Teen Fiction
-</div>
-
-<div class="category-card">
-Action
-</div>
-
-</div>
-
-</section>
-
-
-
-<!-- CERITA BARU -->
-
-<section class="home-section">
-
-<div class="section-header">
-
-<h2>Cerita Baru</h2>
-
-</div>
+<h2>
+Bacaanmu Selanjutnya
+</h2>
 
 <div
 class="story-row"
-id="newStories">
+id="latestStories">
 
 </div>
 
 </section>
 
+<!-- =========================
+     RECOMMENDED
+========================= -->
 
+<section class="story-section">
 
+<p class="section-subtitle">
+Pilihan terbaik
+</p>
 
+<h2>
+Direkomendasikan Untukmu
+</h2>
 
-<script type="module">
+<div
+class="story-row"
+id="recommendedStories">
 
-import { db }
-from './js/firebase.js';
+</div>
 
-import {
-collection,
-getDocs,
-query,
-orderBy,
-limit
-}
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+</section>
 
+<!-- =========================
+     PREMIUM SECTION
+========================= -->
 
+<section class="premium-section">
 
-const container =
-document.getElementById(
-"storyContainer"
-);
+<div class="premium-card">
 
-const newStories =
-document.getElementById(
-"newStories"
-);
+<img
+src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=600">
 
-const searchInput =
-document.getElementById(
-"searchInput"
-);
+<div>
 
+<h2>
+Premium Picks
+</h2>
 
+<h3>
+Cloud Piercer
+</h3>
 
-let allStories = [];
+<p>
 
+Shifters tidak bercampur
+dengan manusia.
+Mereka tinggal
+di pegunungan tinggi.
 
-
-/* =========================
-   RENDER STORIES
-========================= */
-
-function renderStories(stories){
-
-container.innerHTML = "";
-
-stories.forEach((story)=>{
-
-container.innerHTML += `
-
-<a
-href="story.html?id=${story.id}"
-class="story-link">
-
-<div class="modern-story-card">
-
-<img src="${story.cover}">
-
-<div class="modern-story-info">
-
-<h3>${story.title}</h3>
-
-<p>${story.author}</p>
+</p>
 
 </div>
 
 </div>
 
+<div class="premium-card">
+
+<img
+src="https://images.unsplash.com/photo-1512820790803-83ca734da794?q=80&w=600">
+
+<div>
+
+<h2>
+Originals
+</h2>
+
+<h3>
+Perfect Stranger
+</h3>
+
+<p>
+
+Cerita romantis modern
+dengan misteri
+dan konflik emosional.
+
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- =========================
+     FOOTER
+========================= -->
+
+<footer class="wp-footer">
+
+<a href="#">
+Gotalepad Originals
 </a>
 
-`;
-
-});
-
-}
-
-
-
-/* =========================
-   LOAD STORIES
-========================= */
-
-async function loadStories(){
-
-try{
-
-
-
-allStories = [];
-
-container.innerHTML = "";
-
-newStories.innerHTML = "";
-
-
-
-const q =
-query(
-collection(db,"stories"),
-orderBy("createdAt","desc"),
-limit(12)
-);
-
-
-
-const querySnapshot =
-await getDocs(q);
-
-
-
-
-
-querySnapshot.forEach((docItem)=>{
-
-const story = {
-
-id:docItem.id,
-
-...docItem.data()
-
-};
-
-
-
-allStories.push(story);
-
-});
-
-
-
-/* =========================
-   TRENDING STORIES
-========================= */
-
-renderStories(allStories);
-
-
-
-/* =========================
-   CERITA BARU
-========================= */
-
-allStories.forEach((story)=>{
-
-newStories.innerHTML += `
-
-<a
-href="story.html?id=${story.id}"
-class="story-link">
-
-<div class="modern-story-card">
-
-<img src="${story.cover}">
-
-<div class="modern-story-info">
-
-<h3>${story.title}</h3>
-
-<p>${story.author}</p>
-
-</div>
-
-</div>
-
+<a href="#">
+Premium
 </a>
 
-`;
+<a href="#">
+Dapatkan Aplikasi
+</a>
 
-});
+<a href="#">
+Bahasa
+</a>
 
+<a href="#">
+Penulis
+</a>
 
+<a href="#">
+Brand Partnerships
+</a>
 
-}catch(err){
+<a href="#">
+Karier
+</a>
 
-console.error(err);
+<a href="#">
+Bantuan
+</a>
 
-alert(err.message);
+<a href="#">
+Privasi
+</a>
 
-}
+<a href="#">
+Ketentuan
+</a>
 
-}
+</footer>
 
-
-
-/* =========================
-   SEARCH REALTIME
-========================= */
-
-searchInput.oninput = (e)=>{
-
-const keyword =
-e.target.value
-.toLowerCase();
-
-
-
-const filteredStories =
-allStories.filter((story)=>{
-
-return(
-
-story.title
-.toLowerCase()
-.includes(keyword)
-
-||
-
-story.author
-.toLowerCase()
-.includes(keyword)
-
-);
-
-});
-
-
-
-renderStories(filteredStories);
-
-};
-
-
-
-/* =========================
-   START
-========================= */
-
-loadStories();
+<script type="module"
+src="js/home.js">
 
 </script>
 

@@ -1,265 +1,185 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
-
-<title>Profile</title>
-
-<link rel="stylesheet"
-href="style.css">
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil - Gotalepad</title>
+  <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<!-- NAVBAR -->
+<header class="wp-navbar">
+  <div class="wp-left">
+    <a href="index.html" class="wp-logo">Gotalepad</a>
 
-<header class="navbar">
+    <a href="#" class="wp-menu">Jelajahi ▾</a>
+    <a href="#" class="wp-menu">Komunitas ▾</a>
+  </div>
 
-<div class="logo">
- Gotalepad
-</div>
+  <div class="wp-search">
+    <span>⌕</span>
+    <input type="text" placeholder="Cari">
+  </div>
 
-<nav>
+  <div class="wp-right">
+    <a href="write.html" class="wp-menu">Tulis ▾</a>
 
-<a href="index.html">
-Home
-</a>
+    <a href="#" class="premium-btn">
+      ⚡ Coba Premium
+    </a>
 
-<a href="write.html">
-Tulis
-</a>
-
-<a href="library.html">
-Library
-</a>
-
-</nav>
-
+    <button id="logoutBtn" class="profile-btn">
+      Keluar
+    </button>
+  </div>
 </header>
 
+<main class="profile-page">
 
+  <!-- PROFILE HEADER -->
+  <section class="profile-header">
 
-<!-- PROFILE HEADER -->
+    <div class="profile-cover"></div>
 
-<section class="profile-banner">
+    <div class="profile-top">
 
-<div class="banner-overlay">
+      <img
+        id="profileAvatar"
+        src="https://i.pravatar.cc/300"
+        class="profile-avatar"
+      >
 
-<div class="profile-top">
+      <div class="profile-info">
 
-<div class="profile-avatar">
+        <h1 id="profileUsername">
+          Loading...
+        </h1>
 
-<img
-src="https://i.pravatar.cc/300"
-id="profileAvatar">
+        <p id="profileBio">
+          Penulis di Gotalepad
+        </p>
 
-<label
-for="avatarInput"
-class="upload-avatar-btn">
+        <div class="profile-stats">
 
-📷
+          <div>
+            <strong id="storyCount">0</strong>
+            <span>Karya</span>
+          </div>
 
-</label>
+          <div>
+            <strong>0</strong>
+            <span>Daftar Bacaan</span>
+          </div>
 
-<input
-type="file"
-id="avatarInput"
-hidden>
+          <div>
+            <strong>0</strong>
+            <span>Pengikut</span>
+          </div>
 
-</div>
+        </div>
 
-<div class="profile-info">
+      </div>
 
-<h1 id="profileUsername">
-Loading...
-</h1>
+    </div>
 
-<p class="profile-tag">
-Penulis Gotalepad
-</p>
+  </section>
 
-<p class="profile-bio">
-Bio
-</p>
+  <!-- PROFILE MENU -->
+  <section class="profile-tabs">
 
-<div class="profile-stats">
+    <button class="tab-btn active">
+      Karya
+    </button>
 
-<div>
-<h3 id="storyCount">
-0
-</h3>
-<p>Cerita</p>
-</div>
+    <button class="tab-btn">
+      Daftar Bacaan
+    </button>
 
-<div>
-<h3>
-0
-</h3>
-<p>Followers</p>
-</div>
+    <button class="tab-btn">
+      Tentang
+    </button>
 
-<div>
-<h3>
-0
-</h3>
-<p>Mengikuti</p>
-</div>
+  </section>
 
-</div>
+  <!-- STORIES -->
+  <section class="profile-stories">
 
-</div>
+    <div class="section-header">
+      <h2>Cerita Saya</h2>
 
-</div>
+      <a href="write.html" class="write-story-btn">
+        + Tulis Cerita
+      </a>
+    </div>
 
-</div>
+    <div id="profileStories" class="story-grid">
 
-</section>
+      <!-- stories -->
 
+    </div>
 
+  </section>
 
-<!-- MAIN CONTENT -->
-
-<div class="profile-layout">
-
-<!-- LEFT -->
-
-<div class="profile-left">
-
-<div class="section-title">
-
-<h2>Cerita Saya</h2>
-
-<a href="write.html">
-<button class="write-story-btn">
-
-+ Tulis Cerita
-
-</button>
-</a>
-
-</div>
-
-<div
-class="story-container"
-id="profileStories">
-
-</div>
-
-</div>
-
-
-
-<!-- RIGHT -->
-
-<div class="profile-right">
-
-<div class="about-card">
-
-<h3>Tentang Penulis</h3>
-
-<p>
-Halo! Selamat datang di profile
-Gotalepad saya 
-</p>
-
-<button class="edit-profile-btn">
-
-Edit Profile
-
-</button>
-
-</div>
-
-
-
-<div class="achievement-card">
-
-<h3>Pencapaian</h3>
-
-<div class="achievement-item">
-
-🏆 Penulis Aktif
-
-</div>
-
-<div class="achievement-item">
-
-🔥 Rising Writer
-
-</div>
-
-<div class="achievement-item">
-
-⭐ Cerita Populer
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-
+</main>
 
 <script type="module">
 
 import { auth, db }
-from './js/firebase.js';
+from "./js/firebase.js";
 
 import {
-onAuthStateChanged
+  onAuthStateChanged,
+  signOut
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
-doc,
-getDoc,
-updateDoc,
-collection,
-getDocs,
-query,
-where
+  doc,
+  getDoc,
+  collection,
+  getDocs,
+  query,
+  where
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-import {
-getStorage,
-ref,
-uploadBytes,
-getDownloadURL
-}
-from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
-
-const username =
+const usernameEl =
 document.getElementById(
 "profileUsername"
 );
 
-const storyCount =
+const bioEl =
+document.getElementById(
+"profileBio"
+);
+
+const avatarEl =
+document.getElementById(
+"profileAvatar"
+);
+
+const storyCountEl =
 document.getElementById(
 "storyCount"
 );
 
-const profileStories =
+const storiesContainer =
 document.getElementById(
 "profileStories"
 );
-const storage =
-getStorage();
 
+const logoutBtn =
+document.getElementById(
+"logoutBtn"
+);
 
-let currentUser = null;
+/* =========================
+   AUTH
+========================= */
+
 onAuthStateChanged(auth,
 async(user)=>{
 
-    currentUser = user;
 if(!user){
 
 window.location.href =
@@ -269,68 +189,137 @@ return;
 
 }
 
+loadProfile(user);
 
+loadStories(user.uid);
 
-const userDoc =
-await getDoc(
-doc(db,"users",user.uid)
+});
+
+/* =========================
+   LOAD PROFILE
+========================= */
+
+async function loadProfile(user){
+
+try{
+
+const userRef =
+doc(
+db,
+"users",
+user.uid
 );
 
-const userData =
-userDoc.data();
+const snap =
+await getDoc(userRef);
 
+if(snap.exists()){
 
+const data =
+snap.data();
 
-username.innerText =
-userData.username;
-if(userData.avatar){
+usernameEl.innerText =
+data.username ||
+"Gotalepad Writer";
 
-document
-.getElementById("profileAvatar")
-.src =
-userData.avatar;
+bioEl.innerText =
+data.bio ||
+"Belum ada bio.";
+
+if(data.avatar){
+
+avatarEl.src =
+data.avatar;
 
 }
 
+}else{
 
+usernameEl.innerText =
+user.email;
+
+}
+
+}catch(err){
+
+console.error(err);
+
+}
+
+}
+
+/* =========================
+   LOAD STORIES
+========================= */
+
+async function loadStories(uid){
+
+storiesContainer.innerHTML =
+"Loading...";
+
+try{
 
 const q =
 query(
 collection(db,"stories"),
-where("uid","==",user.uid)
+where("uid","==",uid)
 );
-
-
 
 const querySnapshot =
 await getDocs(q);
 
-
-
-storyCount.innerText =
+storyCountEl.innerText =
 querySnapshot.size;
 
+storiesContainer.innerHTML =
+"";
 
+if(querySnapshot.empty){
+
+storiesContainer.innerHTML = `
+
+<p class="empty-text">
+Belum ada cerita.
+</p>
+
+`;
+
+return;
+
+}
 
 querySnapshot.forEach((docItem)=>{
 
-const data =
+const story =
 docItem.data();
 
-profileStories.innerHTML += `
+storiesContainer.innerHTML += `
 
-<a href="story.html?id=${docItem.id}"
+<a
+href="story.html?id=${docItem.id}"
 class="story-link">
 
-<div class="story-card">
+<div class="wp-story-card">
 
-<img src="${data.cover}">
+<img
+src="${
+story.cover ||
+'https://via.placeholder.com/300x450?text=No+Cover'
+}">
 
-<div class="story-info">
+<div class="wp-story-info">
 
-<h3>${data.title}</h3>
+<h3>
+${story.title}
+</h3>
 
-<p>${data.author}</p>
+<p>
+${story.author || story.email}
+</p>
+
+<span>
+👁 0
+</span>
 
 </div>
 
@@ -341,77 +330,31 @@ class="story-link">
 `;
 
 });
-document
-.getElementById("avatarInput")
-.onchange = async (e)=>{
-
-const file =
-e.target.files[0];
-
-if(!file) return;
-
-
-
-try{
-
-
-
-const storageRef =
-ref(
-storage,
-"avatars/" +
-currentUser.uid
-);
-
-
-
-await uploadBytes(
-storageRef,
-file
-);
-
-
-
-const avatarURL =
-await getDownloadURL(
-storageRef
-);
-
-
-
-await updateDoc(
-doc(
-db,
-"users",
-currentUser.uid
-),
-{
-avatar:avatarURL
-}
-);
-
-
-
-document
-.getElementById("profileAvatar")
-.src =
-avatarURL;
-
-
-
-alert("Avatar berhasil diupdate!");
-
-
 
 }catch(err){
 
-alert(err.message);
+console.error(err);
+
+storiesContainer.innerHTML =
+"Gagal memuat cerita.";
 
 }
 
-};
+}
 
-});
+/* =========================
+   LOGOUT
+========================= */
+
+logoutBtn.onclick =
+async ()=>{
+
+await signOut(auth);
+
+window.location.href =
+"login.html";
+
+};
 
 </script>
 

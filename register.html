@@ -1,111 +1,237 @@
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
+  <meta charset="UTF-8">
 
-<meta charset="UTF-8">
+  <meta name="viewport"
+  content="width=device-width, initial-scale=1.0">
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+  <title>Daftar - Gotalepad</title>
 
-<title>Register</title>
-
-<link rel="stylesheet"
-href="style.css">
-
+  <link rel="stylesheet"
+  href="style.css">
 </head>
+<body class="auth-body">
 
-<body>
+<!-- NAVBAR -->
+<header class="wp-navbar">
 
-<div class="auth-container">
+  <div class="wp-left">
 
-<h1>Daftar Gotalepad</h1>
+    <a href="index.html"
+    class="wp-logo">
 
-<input
-type="email"
-id="email"
-placeholder="Email">
+      Gotalepad
 
-<input
-type="password"
-id="password"
-placeholder="Password">
+    </a>
 
-<button id="registerBtn">
+  </div>
 
-Daftar
+  <div class="wp-right">
 
-</button>
+    <a href="login.html"
+    class="auth-nav-btn">
 
-<p class="auth-switch">
+      Login
 
-Sudah punya akun?
+    </a>
 
-<a href="login.html">
-Login
-</a>
+  </div>
 
-</p>
+</header>
 
-</div>
+<!-- REGISTER PAGE -->
+<main class="auth-page">
 
+  <!-- LEFT -->
+  <section class="auth-left">
 
+    <div class="auth-left-content">
+
+      <h1>
+        Mulai Perjalananmu
+        di Gotalepad
+      </h1>
+
+      <p>
+        Jadilah penulis berikutnya
+        dan bagikan cerita terbaikmu
+        kepada dunia.
+      </p>
+
+      <div class="auth-features">
+
+        <div class="feature-item">
+
+          ✍️
+          <span>
+            Tulis cerita tanpa batas
+          </span>
+
+        </div>
+
+        <div class="feature-item">
+
+          📖
+          <span>
+            Bangun pembaca setiamu
+          </span>
+
+        </div>
+
+        <div class="feature-item">
+
+          🚀
+          <span>
+            Publikasikan novelmu
+          </span>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+  <!-- RIGHT -->
+  <section class="auth-right">
+
+    <div class="auth-card">
+
+      <h2>
+        Buat Akun
+      </h2>
+
+      <p class="auth-subtitle">
+        Daftar untuk mulai menulis
+      </p>
+
+      <!-- USERNAME -->
+      <div class="input-group">
+
+        <label>
+          Username
+        </label>
+
+        <input
+        type="text"
+        id="username"
+        placeholder="Masukkan username">
+
+      </div>
+
+      <!-- EMAIL -->
+      <div class="input-group">
+
+        <label>
+          Email
+        </label>
+
+        <input
+        type="email"
+        id="email"
+        placeholder="Masukkan email">
+
+      </div>
+
+      <!-- PASSWORD -->
+      <div class="input-group">
+
+        <label>
+          Password
+        </label>
+
+        <input
+        type="password"
+        id="password"
+        placeholder="Masukkan password">
+
+      </div>
+
+      <!-- BUTTON -->
+      <button
+      id="registerBtn"
+      class="auth-btn">
+
+        Daftar
+
+      </button>
+
+      <p class="switch-auth">
+
+        Sudah punya akun?
+
+        <a href="login.html">
+          Login
+        </a>
+
+      </p>
+
+    </div>
+
+  </section>
+
+</main>
 
 <script type="module">
 
 import { auth, db }
-from './js/firebase.js';
+from "./js/firebase.js";
 
 import {
-createUserWithEmailAndPassword
+  createUserWithEmailAndPassword
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 import {
-doc,
-setDoc
+  doc,
+  setDoc,
+  serverTimestamp
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-
-
-const btn =
+const registerBtn =
 document.getElementById(
 "registerBtn"
 );
 
+registerBtn.onclick =
+async ()=>{
 
-
-btn.onclick = async ()=>{
+const username =
+document.getElementById(
+"username"
+).value;
 
 const email =
-document
-.getElementById("email")
-.value;
+document.getElementById(
+"email"
+).value;
 
 const password =
-document
-.getElementById("password")
-.value;
+document.getElementById(
+"password"
+).value;
 
+if(
+!username ||
+!email ||
+!password
+){
 
-
-if(!email || !password){
-
-alert("Lengkapi semua data!");
+alert(
+"Lengkapi semua data!"
+);
 
 return;
 
 }
 
-
-
 try{
 
-
-
 /* =========================
-   REGISTER FIREBASE AUTH
+   CREATE AUTH
 ========================= */
 
 const userCredential =
@@ -118,56 +244,50 @@ password
 const user =
 userCredential.user;
 
-
-
 /* =========================
-   SIMPAN USER DATABASE
+   SAVE USER DATA
 ========================= */
 
 await setDoc(
-doc(db,"users",user.uid),
+doc(
+db,
+"users",
+user.uid
+),
 {
 
 username:
-"writer_" +
-Math.floor(
-Math.random()*9999
-),
+username,
+
+email:
+email,
 
 bio:
-"Belum menambahkan bio.",
+"Penulis di Gotalepad",
 
 avatar:
 "https://i.pravatar.cc/300",
 
-email:email,
-
 createdAt:
-Date.now()
+serverTimestamp()
 
 }
 );
 
-
-
-alert("Register berhasil!");
-
-
-
-/* =========================
-   MASUK KE PROFILE
-========================= */
+alert(
+"Register berhasil!"
+);
 
 window.location.href =
 "profile.html";
 
-
-
 }catch(err){
 
-alert(err.message);
-
 console.error(err);
+
+alert(
+err.message
+);
 
 }
 
