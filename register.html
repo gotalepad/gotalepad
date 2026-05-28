@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Register - GoTalePad</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+</head>
+
+<body class="auth-body">
+
+<div class="auth-container">
+  <div class="auth-box">
+
+    <h1>GoTalePad</h1>
+    <p class="auth-subtitle">Buat akun baru</p>
+
+    <input type="text" id="username" placeholder="Username">
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password minimal 6 karakter">
+
+    <button onclick="registerUser()">Register</button>
+
+    <p class="auth-switch">
+      Sudah punya akun?
+      <a href="login.html">Login</a>
+    </p>
+
+    <p id="message"></p>
+
+  </div>
+</div>
+
+<script src="firebase.js"></script>
+
+<script>
+function registerUser() {
+  const username = document.getElementById("username").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value;
+  const message = document.getElementById("message");
+
+  if (username === "" || email === "" || password === "") {
+    message.style.color = "red";
+    message.innerHTML = "Semua kolom wajib diisi.";
+    return;
+  }
+
+  auth.createUserWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+      const user = userCredential.user;
+
+      return db.collection("users").doc(user.uid).set({
+        username: username,
+        email: email,
+        bio: "Penulis baru di GoTalePad",
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    })
+    .then(() => {
+      message.style.color = "lightgreen";
+      message.innerHTML = "Register berhasil!";
+
+      setTimeout(() => {
+        window.location.href = "index.html";
+      }, 1000);
+    })
+    .catch((error) => {
+      message.style.color = "red";
+      message.innerHTML = error.message;
+    });
+}
+</script>
+
+</body>
+</html>

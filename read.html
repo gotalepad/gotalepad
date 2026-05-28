@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Baca Cerita - GoTalePad</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+</head>
+
+<body>
+
+<header class="header">
+  <div class="logo">GoTalePad</div>
+
+  <nav class="nav">
+    <a href="index.html">Home</a>
+    <a href="library.html">Library</a>
+    <a href="write.html">Write</a>
+    <a href="profile.html">Profile</a>
+  </nav>
+</header>
+
+<section class="read-page">
+
+  <div class="read-card">
+
+    <a id="backToStory" href="index.html" class="login-btn">← Kembali</a>
+
+    <h1 id="chapterTitle">Loading...</h1>
+
+    <p id="storyTitle" class="read-story-title">Loading...</p>
+
+    <div id="chapterContent" class="chapter-content">
+      Loading...
+    </div>
+
+  </div>
+
+</section>
+
+<footer class="footer">
+  <p>© 2026 GoTalePad. All rights reserved.</p>
+</footer>
+
+<script src="firebase.js"></script>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const storyId = params.get("story");
+const chapterId = params.get("chapter");
+
+loadChapter();
+
+async function loadChapter() {
+  const chapterTitle = document.getElementById("chapterTitle");
+  const storyTitle = document.getElementById("storyTitle");
+  const chapterContent = document.getElementById("chapterContent");
+  const backToStory = document.getElementById("backToStory");
+
+  if (!storyId || !chapterId) {
+    chapterTitle.innerText = "Chapter tidak ditemukan.";
+    chapterContent.innerText = "Link chapter tidak valid.";
+    return;
+  }
+
+  backToStory.href = "story.html?id=" + storyId;
+
+  try {
+    const storyDoc = await db.collection("stories").doc(storyId).get();
+
+    if (!storyDoc.exists) {
+      chapterTitle.innerText = "Cerita tidak ditemukan.";
+      chapterContent.innerText = "";
+      return;
+    }
+
+    const story = storyDoc.data();
+    storyTitle.innerText = story.title || "Tanpa Judul";
+
+    const chapterDoc = await db
+      .collection("stories")
+      .doc(storyId)
+      .collection("chapters")
+      .doc(chapterId)
+      .get();
+
+    if (!chapterDoc.exists) {
+      chapterTitle.innerText = "Chapter tidak ditemukan.";
+      chapterContent.innerText = "";
+      return;
+    }
+
+    const chapter = chapterDoc.data();
+
+    chapterTitle.innerText = chapter.title || "Tanpa Judul Chapter";
+
+    chapterContent.innerHTML = "";
+
+    const paragraphs = (chapter.content || "").split("\n");
+
+    paragraphs.forEach((text) => {
+      const p = document.createElement("p");
+      p.innerText = text;
+      chapterContent.appendChild(p);
+    });
+
+  } catch (error) {
+    chapterTitle.innerText = "Error";
+    chapterContent.innerText = error.message;
+  }
+}
+</script>
+
+</body>
+</html>

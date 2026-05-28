@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile - GoTalePad</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+</head>
+
+<body>
+
+<header class="header">
+  <div class="logo">GoTalePad</div>
+
+  <nav class="nav">
+    <a href="index.html">Home</a>
+    <a href="library.html">Library</a>
+    <a href="write.html">Write</a>
+    <a href="profile.html">Profile</a>
+  </nav>
+
+  <button class="logout-btn" onclick="logoutUser()">Logout</button>
+</header>
+
+<section class="profile-page">
+
+  <div class="profile-header-card">
+    <div class="profile-avatar" id="avatarLetter">G</div>
+
+    <div>
+      <h1 id="profileName">Loading...</h1>
+      <p id="profileEmail">Loading...</p>
+      <p id="profileBio">Loading...</p>
+    </div>
+  </div>
+
+  <div class="profile-stats">
+    <div>
+      <h3 id="storyCount">0</h3>
+      <p>Cerita</p>
+    </div>
+
+    <div>
+      <h3>0</h3>
+      <p>Followers</p>
+    </div>
+
+    <div>
+      <h3>0</h3>
+      <p>Following</p>
+    </div>
+  </div>
+
+  <section class="trending">
+    <h2>Cerita Saya</h2>
+    <div class="story-grid" id="myStories"></div>
+  </section>
+
+</section>
+
+<footer class="footer">
+  <p>© 2026 GoTalePad. All rights reserved.</p>
+</footer>
+
+<script src="firebase.js"></script>
+
+<script>
+auth.onAuthStateChanged(async function(user) {
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  const userDoc = await db.collection("users").doc(user.uid).get();
+
+  let username = "User";
+  let bio = "Penulis GoTalePad";
+
+  if (userDoc.exists) {
+    username = userDoc.data().username || "User";
+    bio = userDoc.data().bio || "Penulis GoTalePad";
+  }
+
+  document.getElementById("profileName").innerText = username;
+  document.getElementById("profileEmail").innerText = user.email;
+  document.getElementById("profileBio").innerText = bio;
+  document.getElementById("avatarLetter").innerText = username.charAt(0).toUpperCase();
+
+  loadMyStories(user.uid);
+});
+
+async function loadMyStories(uid) {
+  const container = document.getElementById("myStories");
+  container.innerHTML = "";
+
+  const snapshot = await db
+    .collection("stories")
+    .where("authorId", "==", uid)
+    .get();
+
+  document.getElementById("storyCount").innerText = snapshot.size;
+
+  if (snapshot.empty) {
+    container.innerHTML = "<p>Kamu belum membuat cerita.</p>";
+    return;
+  }
+
+  snapshot.forEach((doc) => {
+    const story = doc.data();
+
+    container.innerHTML += `
+      <div class="story-card">
+        <img src="${story.cover || 'https://picsum.photos/300/400'}" alt="cover">
+
+        <div class="story-info">
+          <h3>${story.title}</h3>
+          <p>${story.genre || 'General'}</p>
+
+          <a href="story.html?id=${doc.id}">
+            Lihat Cerita
+          </a>
+        </div>
+      </div>
+    `;
+  });
+}
+
+function logoutUser() {
+  auth.signOut().then(() => {
+    window.location.href = "login.html";
+  });
+}
+</script>
+
+</body>
+</html>

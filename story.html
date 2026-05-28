@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Detail Cerita - GoTalePad</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+</head>
+
+<body>
+
+<header class="header">
+  <div class="logo">GoTalePad</div>
+
+  <nav class="nav">
+    <a href="index.html">Home</a>
+    <a href="library.html">Library</a>
+    <a href="write.html">Write</a>
+    <a href="profile.html">Profile</a>
+  </nav>
+
+  <div class="auth-buttons">
+    <a href="login.html" class="login-btn">Login</a>
+    <a href="register.html" class="register-btn">Register</a>
+  </div>
+</header>
+
+<section class="story-detail-page">
+
+  <div class="story-detail-card">
+
+    <img id="storyCover" src="https://picsum.photos/300/400" alt="cover">
+
+    <div class="story-detail-info">
+      <h1 id="storyTitle">Loading...</h1>
+      <p id="storyGenre">Loading...</p>
+      <p id="storyAuthor">Loading...</p>
+      <p id="storyDescription">Loading...</p>
+
+      <div class="story-actions">
+        <button onclick="addToLibrary()">Tambah ke Library</button>
+        <a id="addChapterBtn" class="login-btn" href="#" style="display:none;">Tambah Chapter</a>
+      </div>
+    </div>
+
+  </div>
+
+  <section class="chapter-list-section">
+    <h2>Daftar Chapter</h2>
+    <div id="chapterList"></div>
+  </section>
+
+</section>
+
+<footer class="footer">
+  <p>© 2026 GoTalePad. All rights reserved.</p>
+</footer>
+
+<script src="firebase.js"></script>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const storyId = params.get("id");
+
+let currentUser = null;
+let currentStory = null;
+
+auth.onAuthStateChanged(function(user) {
+  currentUser = user;
+  loadStory();
+});
+
+async function loadStory() {
+  if (!storyId) {
+    document.getElementById("storyTitle").innerText = "ID cerita tidak ditemukan.";
+    return;
+  }
+
+  try {
+    const storyDoc = await db.collection("stories").doc(storyId).get();
+
+    if (!storyDoc.exists) {
+      document.getElementById("storyTitle").innerText = "Cerita tidak ditemukan.";
+      return;
+    }
+
+    currentStory = storyDoc.data();
+
+    document.getElementById("storyCover").src = currentStory.cover || "https://picsum.photos/300/400";
+    document.getElementById("storyTitle").innerText = currentStory.title || "Tanpa Judul";
+    document.getElementById("storyGenre").innerText = "Genre: " + (currentStory.genre || "General");
+    document.getElementById("storyAuthor").innerText = "Penulis: " + (currentStory.authorEmail || "Unknown");
+    document.getElementById("storyDescription").innerText = currentStory.description || "";
+
+    if (currentUser && currentStory.authorId === currentUser.uid) {
+      const addChapterBtn = document.getElementById("addChapterBtn");
+      addChapterBtn.style.display = "inline-block";
+      addChapterBtn.href = "add-chapter.html?id=" + storyId;
+    }
+
+    loadChapters();
+
+  } catch (error) {
+    document.getElementById("storyTitle").innerText = error.message;
+  }
+}
+
+async function loadChapters() {
+  const chapterList = document.getElementById("chapterList");
+  chapterList.innerHTML = "";
+
+  try {
+    const snapshot = await db
+      .collection("stories")
+      .doc(storyId)
+      .collection("chapters")
+      .orderBy("createdAt", "asc")
+      .get();
+
+    if (snapshot.empty) {
+      chapterList.innerHTML = "<p>Belum ada chapter.</p>";
+      return;
+    }
+
+    let number = 1;
+
+    snapshot.forEach((doc) => {
+      const chapter = doc.data();
+
+      chapterList.innerHTML += `
+        <div class="chapter-item">
+          <div>
+            <h3>Chapter ${number}: ${chapter.title}</h3>
+          </div>
+
+          <a href="read.html?story=${storyId}&chapter=${doc.id}">
+            Baca
+          </a>
+        </div>
+      `;
+
+      number++;
+    });
+
+  } catch (error) {
+    chapterList.innerHTML = "<p style='color:red;'>" + error.message + "</p>";
+  }
+}
+
+async function addToLibrary() {
+  if (!currentUser) {
+    alert("Login dulu untuk menambahkan ke library.");
+    window.location.href = "login.html";
+    return;
+  }
+
+  try {
+    await db
+      .collection("users")
+      .doc(currentUser.uid)
+      .collection("library")
+      .doc(storyId)
+      .set({
+        storyId: storyId,
+        title: currentStory.title,
+        cover: currentStory.cover || "https://picsum.photos/300/400",
+        genre: currentStory.genre || "General",
+        addedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+    alert("Berhasil ditambahkan ke library!");
+
+  } catch (error) {
+    alert(error.message);
+  }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Library - GoTalePad</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+</head>
+
+<body>
+
+<header class="header">
+  <div class="logo">GoTalePad</div>
+
+  <nav class="nav">
+    <a href="index.html">Home</a>
+    <a href="library.html">Library</a>
+    <a href="write.html">Write</a>
+    <a href="profile.html">Profile</a>
+  </nav>
+
+  <div class="auth-buttons">
+    <a href="profile.html" class="login-btn">Profile</a>
+  </div>
+</header>
+
+<section class="trending library-page">
+
+  <h2>Library Saya</h2>
+  <p class="section-subtitle">Cerita yang kamu simpan akan muncul di sini.</p>
+
+  <div class="story-grid" id="libraryGrid">
+    <p>Loading...</p>
+  </div>
+
+</section>
+
+<footer class="footer">
+  <p>© 2026 GoTalePad. All rights reserved.</p>
+</footer>
+
+<script src="firebase.js"></script>
+
+<script>
+auth.onAuthStateChanged(function(user) {
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  loadLibrary(user.uid);
+});
+
+async function loadLibrary(uid) {
+  const libraryGrid = document.getElementById("libraryGrid");
+  libraryGrid.innerHTML = "";
+
+  try {
+    const snapshot = await db
+      .collection("users")
+      .doc(uid)
+      .collection("library")
+      .orderBy("addedAt", "desc")
+      .get();
+
+    if (snapshot.empty) {
+      libraryGrid.innerHTML = "<p>Library kamu masih kosong.</p>";
+      return;
+    }
+
+    snapshot.forEach((doc) => {
+      const item = doc.data();
+
+      libraryGrid.innerHTML += `
+        <div class="story-card">
+          <img src="${item.cover || 'https://picsum.photos/300/400'}" alt="cover">
+
+          <div class="story-info">
+            <h3>${item.title || 'Tanpa Judul'}</h3>
+            <p>${item.genre || 'General'}</p>
+
+            <a href="story.html?id=${item.storyId}">
+              Buka Cerita
+            </a>
+          </div>
+        </div>
+      `;
+    });
+
+  } catch (error) {
+    libraryGrid.innerHTML = "<p style='color:red;'>" + error.message + "</p>";
+  }
+}
+</script>
+
+</body>
+</html>

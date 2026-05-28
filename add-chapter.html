@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Tambah Chapter - GoTalePad</title>
+
+<link rel="stylesheet" href="style.css">
+
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+</head>
+
+<body>
+
+<header class="header">
+  <div class="logo">GoTalePad</div>
+
+  <nav class="nav">
+    <a href="index.html">Home</a>
+    <a href="library.html">Library</a>
+    <a href="write.html">Write</a>
+    <a href="profile.html">Profile</a>
+  </nav>
+
+  <div class="auth-buttons">
+    <a href="profile.html" class="login-btn">Profile</a>
+  </div>
+</header>
+
+<section class="form-page">
+
+  <div class="form-card wide">
+
+    <h1>Tambah Chapter</h1>
+    <p>Tulis chapter pertama atau chapter lanjutan cerita kamu.</p>
+
+    <input type="text" id="chapterTitle" placeholder="Judul chapter">
+
+    <textarea id="chapterContent" class="chapter-textarea" placeholder="Tulis isi chapter di sini..."></textarea>
+
+    <button onclick="addChapter()">
+      Simpan Chapter
+    </button>
+
+    <p id="message"></p>
+
+    <div id="afterSave" style="display:none;">
+      <a id="viewStoryBtn" class="start-btn" href="#">Lihat Cerita</a>
+      <a class="login-btn" href="profile.html">Kembali ke Profile</a>
+    </div>
+
+  </div>
+
+</section>
+
+<footer class="footer">
+  <p>© 2026 GoTalePad. All rights reserved.</p>
+</footer>
+
+<script src="firebase.js"></script>
+
+<script>
+let currentUser = null;
+let storyId = null;
+
+const params = new URLSearchParams(window.location.search);
+storyId = params.get("id");
+
+auth.onAuthStateChanged(async function(user) {
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
+
+  currentUser = user;
+
+  if (!storyId) {
+    document.getElementById("message").style.color = "red";
+    document.getElementById("message").innerHTML = "ID cerita tidak ditemukan.";
+    return;
+  }
+
+  try {
+    const storyDoc = await db.collection("stories").doc(storyId).get();
+
+    if (!storyDoc.exists) {
+      document.getElementById("message").style.color = "red";
+      document.getElementById("message").innerHTML = "Cerita tidak ditemukan.";
+      return;
+    }
+
+    const story = storyDoc.data();
+
+    if (story.authorId !== currentUser.uid) {
+      document.getElementById("message").style.color = "red";
+      document.getElementById("message").innerHTML = "Kamu bukan pemilik cerita ini.";
+      return;
+    }
+
+  } catch (error) {
+    document.getElementById("message").style.color = "red";
+    document.getElementById("message").innerHTML = error.message;
+  }
+});
+
+async function addChapter() {
+  const chapterTitle = document.getElementById("chapterTitle").value.trim();
+  const chapterContent = document.getElementById("chapterContent").value.trim();
+  const message = document.getElementById("message");
+
+  if (!currentUser) {
+    message.style.color = "red";
+    message.innerHTML = "Kamu harus login dulu.";
+    return;
+  }
+
+  if (!storyId) {
+    message.style.color = "red";
+    message.innerHTML = "ID cerita tidak ditemukan.";
+    return;
+  }
+
+  if (chapterTitle === "" || chapterContent === "") {
+    message.style.color = "red";
+    message.innerHTML = "Judul dan isi chapter wajib diisi.";
+    return;
+  }
+
+  try {
+    await db
+      .collection("stories")
+      .doc(storyId)
+      .collection("chapters")
+      .add({
+        title: chapterTitle,
+        content: chapterContent,
+        authorId: currentUser.uid,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+
+    message.style.color = "green";
+    message.innerHTML = "Chapter berhasil disimpan!";
+
+    document.getElementById("chapterTitle").value = "";
+    document.getElementById("chapterContent").value = "";
+
+    document.getElementById("afterSave").style.display = "flex";
+    document.getElementById("viewStoryBtn").href = "story.html?id=" + storyId;
+
+  } catch (error) {
+    message.style.color = "red";
+    message.innerHTML = error.message;
+  }
+}
+</script>
+
+</body>
+</html>

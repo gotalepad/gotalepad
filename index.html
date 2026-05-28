@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>GoTalePad</title>
+
+<link rel="stylesheet" href="style.css">
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+
+<div class="logo">
+GoTalePad
+</div>
+
+<nav class="nav">
+
+<a href="index.html">Home</a>
+<a href="library.html">Library</a>
+<a href="write.html">Write</a>
+<a href="profile.html">Profile</a>
+
+</nav>
+
+<div class="auth-buttons">
+
+<a href="login.html" class="login-btn">
+Login
+</a>
+
+<a href="register.html" class="register-btn">
+Register
+</a>
+
+</div>
+
+</header>
+
+<!-- HERO -->
+<section class="hero">
+
+<div class="hero-content">
+
+<h1>
+Temukan Cerita Terbaik
+</h1>
+
+<p>
+Baca dan tulis cerita menarik bersama komunitas GoTalePad.
+</p>
+
+<a href="register.html" class="start-btn">
+Mulai Membaca
+</a>
+
+</div>
+
+</section>
+
+<!-- TRENDING -->
+<section class="trending">
+
+<h2>
+Trending Stories
+</h2>
+
+<div class="story-grid" id="storyGrid">
+
+</div>
+
+<img src="https://picsum.photos/300/400" alt="story">
+
+<div class="story-info">
+
+<h3>
+Love In School
+</h3>
+
+<p>
+Romance • 12 Chapter
+</p>
+
+<a href="read.html">
+Baca Sekarang
+</a>
+
+</div>
+
+</div>
+
+
+<img src="https://picsum.photos/301/400" alt="story">
+
+<div class="story-info">
+
+<h3>
+Dark Fantasy
+</h3>
+
+<p>
+Fantasy • 20 Chapter
+</p>
+
+<a href="read.html">
+Baca Sekarang
+</a>
+
+</div>
+
+</div>
+
+
+<img src="https://picsum.photos/302/400" alt="story">
+
+<div class="story-info">
+
+<h3>
+Misteri Malam
+</h3>
+
+<p>
+Horror • 9 Chapter
+</p>
+
+<a href="read.html">
+Baca Sekarang
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+
+<p>
+© 2026 GoTalePad. All rights reserved.
+</p>
+
+</footer>
+
+<script src="firebase.js"></script>
+<script src="home.js"></script>
+
+</body>
+</html>
