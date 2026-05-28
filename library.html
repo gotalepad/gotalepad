@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Library - Gotalepad</title>
+
+  <link rel="stylesheet" href="./style.css">
+
+  <style>
+    body{
+      margin:0;
+      font-family:Arial, Helvetica, sans-serif;
+      background:#f7f7f7;
+      color:#111;
+    }
+
+    header{
+      background:#fff;
+      border-bottom:1px solid #eee;
+      padding:18px 40px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      position:sticky;
+      top:0;
+      z-index:100;
+    }
+
+    .logo{
+      font-size:38px;
+      font-weight:bold;
+      color:#ff5000;
+    }
+
+    nav{
+      display:flex;
+      gap:20px;
+      align-items:center;
+    }
+
+    nav a{
+      text-decoration:none;
+      color:#111;
+      font-weight:600;
+    }
+
+    .profile-btn{
+      background:#ff5000;
+      color:#fff;
+      padding:10px 22px;
+      border-radius:30px;
+    }
+
+    .library-container{
+      max-width:1300px;
+      margin:50px auto;
+      padding:0 20px;
+    }
+
+    .library-title{
+      font-size:48px;
+      margin-bottom:40px;
+    }
+
+    .story-grid{
+      display:grid;
+      grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+      gap:28px;
+    }
+
+    .story-card{
+      background:#fff;
+      border-radius:18px;
+      overflow:hidden;
+      box-shadow:0 5px 20px rgba(0,0,0,.08);
+      transition:.3s;
+      cursor:pointer;
+    }
+
+    .story-card:hover{
+      transform:translateY(-5px);
+    }
+
+    .story-card img{
+      width:100%;
+      height:320px;
+      object-fit:cover;
+      background:#ddd;
+    }
+
+    .story-info{
+      padding:18px;
+    }
+
+    .story-info h3{
+      font-size:22px;
+      margin-bottom:8px;
+    }
+
+    .story-info p{
+      color:#666;
+      margin-bottom:12px;
+    }
+
+    .story-meta{
+      display:flex;
+      justify-content:space-between;
+      color:#777;
+      font-size:14px;
+    }
+
+    .empty{
+      text-align:center;
+      padding:100px 20px;
+      color:#777;
+      font-size:22px;
+    }
+
+    @media(max-width:900px){
+
+      header{
+        padding:20px;
+      }
+
+      .library-title{
+        font-size:36px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+
+  <div class="logo">
+    Gotalepad
+  </div>
+
+  <nav>
+    <a href="./index.html">Beranda</a>
+    <a href="./write.html">Tulis</a>
+    <a href="./profile.html" class="profile-btn">
+      Profile
+    </a>
+  </nav>
+
+</header>
+
+<div class="library-container">
+
+  <h1 class="library-title">
+    Library Saya
+  </h1>
+
+  <div class="story-grid" id="libraryContainer">
+
+    <div class="empty">
+      Loading...
+    </div>
+
+  </div>
+
+</div>
+
+<script type="module">
+
+import { auth, db }
+from "./firebase.js";
+
+import {
+  onAuthStateChanged
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+  collection,
+  getDocs,
+  doc,
+  getDoc
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const libraryContainer =
+document.getElementById(
+"libraryContainer"
+);
+
+onAuthStateChanged(
+auth,
+async(user)=>{
+
+  if(!user){
+
+    window.location.href =
+    "./login.html";
+
+    return;
+
+  }
+
+  loadLibrary(user.uid);
+
+});
+
+async function loadLibrary(uid){
+
+  try{
+
+    libraryContainer.innerHTML = "";
+
+    const libraryRef =
+    collection(
+      db,
+      "users",
+      uid,
+      "library"
+    );
+
+    const snapshot =
+    await getDocs(libraryRef);
+
+    if(snapshot.empty){
+
+      libraryContainer.innerHTML = `
+        <div class="empty">
+          Belum ada cerita di library
+        </div>
+      `;
+
+      return;
+
+    }
+
+    for(const item of snapshot.docs){
+
+      const data =
+      item.data();
+
+      const storyRef =
+      await getDoc(
+        doc(
+          db,
+          "stories",
+          data.storyId
+        )
+      );
+
+      if(storyRef.exists()){
+
+        const story =
+        storyRef.data();
+
+        const div =
+        document.createElement("div");
+
+        div.className =
+        "story-card";
+
+        div.innerHTML = `
+          <img
+            src="${
+              story.cover ||
+              story.coverUrl ||
+              'https://via.placeholder.com/300x450'
+            }"
+          >
+
+          <div class="story-info">
+
+            <h3>
+              ${story.title || 'Tanpa Judul'}
+            </h3>
+
+            <p>
+              ${story.author || 'Penulis'}
+            </p>
+
+            <div class="story-meta">
+              <span>
+                👁 ${story.views || 0}
+              </span>
+
+              <span>
+                ⭐ ${story.votes || 0}
+              </span>
+            </div>
+
+          </div>
+        `;
+
+        div.addEventListener(
+        "click",
+        ()=>{
+
+          window.location.href =
+          "./story.html?id=" +
+          storyRef.id;
+
+        });
+
+        libraryContainer.appendChild(div);
+
+      }
+
+    }
+
+  }catch(error){
+
+    console.error(error);
+
+    libraryContainer.innerHTML = `
+      <div class="empty">
+        Gagal memuat library
+      </div>
+    `;
+
+  }
+
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cerita - Gotalepad</title>
+
+  <link rel="stylesheet" href="./style.css">
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+      font-family:Arial, Helvetica, sans-serif;
+      background:#f7f7f7;
+      color:#111;
+    }
+
+    header{
+      background:#fff;
+      border-bottom:1px solid #eee;
+      padding:18px 40px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      position:sticky;
+      top:0;
+      z-index:100;
+    }
+
+    .logo{
+      font-size:38px;
+      font-weight:bold;
+      color:#ff5000;
+    }
+
+    nav{
+      display:flex;
+      gap:20px;
+      align-items:center;
+    }
+
+    nav a{
+      text-decoration:none;
+      color:#111;
+      font-weight:600;
+    }
+
+    .profile-btn{
+      background:#ff5000;
+      color:#fff;
+      padding:10px 22px;
+      border-radius:30px;
+    }
+
+    .story-container{
+      max-width:1200px;
+      margin:50px auto;
+      padding:0 20px;
+      display:grid;
+      grid-template-columns:320px 1fr;
+      gap:40px;
+    }
+
+    .cover-card{
+      background:#fff;
+      border-radius:20px;
+      overflow:hidden;
+      box-shadow:0 5px 20px rgba(0,0,0,.08);
+      height:fit-content;
+    }
+
+    .cover-card img{
+      width:100%;
+      height:470px;
+      object-fit:cover;
+      background:#ddd;
+    }
+
+    .cover-info{
+      padding:20px;
+    }
+
+    .cover-info h2{
+      font-size:30px;
+      margin-bottom:10px;
+    }
+
+    .author{
+      color:#777;
+      margin-bottom:20px;
+    }
+
+    .stats{
+      display:flex;
+      gap:20px;
+      margin-bottom:20px;
+      color:#555;
+      font-size:15px;
+    }
+
+    .read-btn{
+      width:100%;
+      padding:15px;
+      border:none;
+      border-radius:12px;
+      background:#ff5000;
+      color:#fff;
+      font-size:18px;
+      font-weight:bold;
+      cursor:pointer;
+    }
+
+    .story-content{
+      background:#fff;
+      border-radius:20px;
+      padding:40px;
+      box-shadow:0 5px 20px rgba(0,0,0,.08);
+    }
+
+    .story-content h1{
+      font-size:50px;
+      margin-bottom:20px;
+    }
+
+    .description{
+      color:#555;
+      line-height:1.8;
+      font-size:18px;
+      margin-bottom:35px;
+    }
+
+    .chapter-title{
+      font-size:28px;
+      margin-bottom:20px;
+    }
+
+    .chapters{
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+    }
+
+    .chapter-card{
+      background:#fafafa;
+      border:1px solid #eee;
+      border-radius:15px;
+      padding:22px;
+      cursor:pointer;
+      transition:.3s;
+    }
+
+    .chapter-card:hover{
+      border-color:#ff5000;
+      transform:translateY(-2px);
+    }
+
+    .chapter-card h3{
+      margin-bottom:8px;
+      font-size:22px;
+    }
+
+    .chapter-card p{
+      color:#777;
+      font-size:15px;
+    }
+
+    .loading{
+      text-align:center;
+      padding:60px;
+      font-size:22px;
+      color:#777;
+    }
+
+    @media(max-width:900px){
+
+      .story-container{
+        grid-template-columns:1fr;
+      }
+
+      .story-content h1{
+        font-size:38px;
+      }
+
+      header{
+        padding:20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+
+  <div class="logo">
+    Gotalepad
+  </div>
+
+  <nav>
+    <a href="./index.html">Beranda</a>
+    <a href="./write.html">Tulis</a>
+    <a href="./library.html">Library</a>
+    <a href="./profile.html" class="profile-btn">
+      Profile
+    </a>
+  </nav>
+
+</header>
+
+<div class="story-container">
+
+  <div class="cover-card">
+
+    <img
+      id="storyCover"
+      src="https://via.placeholder.com/400x600"
+    >
+
+    <div class="cover-info">
+
+      <h2 id="storyTitle">
+        Loading...
+      </h2>
+
+      <div class="author" id="storyAuthor">
+        Loading...
+      </div>
+
+      <div class="stats">
+        <span id="storyViews">0 Views</span>
+        <span id="storyVotes">0 Votes</span>
+      </div>
+
+      <button class="read-btn" id="readBtn">
+        Mulai Membaca
+      </button>
+
+    </div>
+
+  </div>
+
+  <div class="story-content">
+
+    <h1 id="contentTitle">
+      Loading...
+    </h1>
+
+    <div class="description" id="storyDescription">
+      Loading...
+    </div>
+
+    <div class="chapter-title">
+      Chapters
+    </div>
+
+    <div class="chapters" id="chaptersContainer">
+
+      <div class="loading">
+        Loading chapters...
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script type="module">
+
+import { db }
+from "./firebase.js";
+
+import {
+  doc,
+  getDoc,
+  collection,
+  getDocs,
+  query,
+  orderBy
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const params =
+new URLSearchParams(window.location.search);
+
+const storyId =
+params.get("id");
+
+const storyTitle =
+document.getElementById("storyTitle");
+
+const contentTitle =
+document.getElementById("contentTitle");
+
+const storyAuthor =
+document.getElementById("storyAuthor");
+
+const storyDescription =
+document.getElementById("storyDescription");
+
+const storyCover =
+document.getElementById("storyCover");
+
+const storyViews =
+document.getElementById("storyViews");
+
+const storyVotes =
+document.getElementById("storyVotes");
+
+const chaptersContainer =
+document.getElementById("chaptersContainer");
+
+const readBtn =
+document.getElementById("readBtn");
+
+async function loadStory(){
+
+  try{
+
+    const storyRef =
+    doc(db,"stories",storyId);
+
+    const storySnap =
+    await getDoc(storyRef);
+
+    if(!storySnap.exists()){
+
+      alert("Cerita tidak ditemukan");
+
+      return;
+
+    }
+
+    const data =
+    storySnap.data();
+
+    storyTitle.textContent =
+    data.title;
+
+    contentTitle.textContent =
+    data.title;
+
+    storyAuthor.textContent =
+    "@" + data.author;
+
+    storyDescription.textContent =
+    data.description;
+
+    storyCover.src =
+    data.coverUrl ||
+    "https://via.placeholder.com/400x600";
+
+    storyViews.textContent =
+    (data.views || 0) + " Views";
+
+    storyVotes.textContent =
+    (data.votes || 0) + " Votes";
+
+    loadChapters();
+
+  }catch(error){
+
+    console.error(error);
+
+    alert(error.message);
+
+  }
+
+}
+
+async function loadChapters(){
+
+  try{
+
+    chaptersContainer.innerHTML = "";
+
+    const chaptersRef =
+    collection(
+      db,
+      "stories",
+      storyId,
+      "chapters"
+    );
+
+    const q =
+    query(
+      chaptersRef,
+      orderBy("createdAt","asc")
+    );
+
+    const querySnapshot =
+    await getDocs(q);
+
+    if(querySnapshot.empty){
+
+      chaptersContainer.innerHTML = `
+        <div class="loading">
+          Belum ada chapter
+        </div>
+      `;
+
+      return;
+
+    }
+
+    querySnapshot.forEach((docItem)=>{
+
+      const chapter =
+      docItem.data();
+
+      const div =
+      document.createElement("div");
+
+      div.className =
+      "chapter-card";
+
+      div.innerHTML = `
+        <h3>${chapter.title}</h3>
+
+        <p>
+          Klik untuk membaca chapter
+        </p>
+      `;
+
+      div.addEventListener("click",()=>{
+
+        window.location.href =
+        "./read.html?story=" +
+        storyId +
+        "&chapter=" +
+        docItem.id;
+
+      });
+
+      chaptersContainer.appendChild(div);
+
+    });
+
+  }catch(error){
+
+    console.error(error);
+
+  }
+
+}
+
+readBtn.addEventListener("click",()=>{
+
+  const firstChapter =
+  document.querySelector(".chapter-card");
+
+  if(firstChapter){
+
+    firstChapter.click();
+
+  }
+
+});
+
+loadStory();
+
+</script>
+
+</body>
+</html>

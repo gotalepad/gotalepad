@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tambah Chapter - Gotalepad</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+<header class="wp-navbar">
+  <div class="wp-left">
+    <a href="./index.html" class="wp-logo">Gotalepad</a>
+  </div>
+
+  <div class="wp-right">
+    <a href="./index.html" class="wp-menu">Beranda</a>
+    <a href="./profile.html" class="wp-menu">Profile</a>
+  </div>
+</header>
+
+<main class="write-page">
+  <section class="write-left">
+    <div class="write-card">
+      <h1>Tambah Chapter</h1>
+      <p class="write-subtitle">Lanjutkan cerita kamu</p>
+
+      <div class="input-group">
+        <label>Judul Chapter</label>
+        <input type="text" id="chapterTitle" placeholder="Contoh: Chapter 2">
+      </div>
+
+      <div class="input-group">
+        <label>Isi Chapter</label>
+        <textarea id="chapterContent" class="big-editor" rows="18" placeholder="Mulai menulis chapter baru..."></textarea>
+      </div>
+
+      <button id="publishBtn" class="publish-btn">Publish Chapter</button>
+    </div>
+  </section>
+</main>
+
+<script type="module">
+import { auth, db } from "./firebase.js";
+
+import {
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+  doc,
+  getDoc,
+  collection,
+  addDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const params = new URLSearchParams(window.location.search);
+const storyId = params.get("id");
+
+const chapterTitle = document.getElementById("chapterTitle");
+const chapterContent = document.getElementById("chapterContent");
+const publishBtn = document.getElementById("publishBtn");
+
+let currentUser = null;
+
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    window.location.href = "./login.html";
+    return;
+  }
+
+  currentUser = user;
+
+  if (!storyId) {
+    alert("ID cerita tidak ditemukan.");
+    window.location.href = "./index.html";
+    return;
+  }
+
+  const storySnap = await getDoc(doc(db, "stories", storyId));
+
+  if (!storySnap.exists()) {
+    alert("Cerita tidak ditemukan.");
+    window.location.href = "./index.html";
+    return;
+  }
+
+  const story = storySnap.data();
+
+  if (story.uid !== currentUser.uid) {
+    alert("Kamu hanya bisa menambah chapter di cerita milikmu.");
+    window.location.href = "./story.html?id=" + storyId;
+  }
+});
+
+publishBtn.onclick = async () => {
+  const title = chapterTitle.value.trim();
+  const content = chapterContent.value.trim();
+
+  if (!title || !content) {
+    alert("Judul dan isi chapter wajib diisi!");
+    return;
+  }
+
+  publishBtn.disabled = true;
+  publishBtn.innerText = "Publishing...";
+
+  try {
+    await addDoc(collection(db, "stories", storyId, "chapters"), {
+      title: title,
+      content: content,
+      createdAt: serverTimestamp()
+    });
+
+    alert("Chapter berhasil dipublish!");
+    window.location.href = "./story.html?id=" + storyId;
+
+  } catch (error) {
+    console.error(error);
+    alert(error.message);
+
+    publishBtn.disabled = false;
+    publishBtn.innerText = "Publish Chapter";
+  }
+};
+</script>
+
+</body>
+</html>

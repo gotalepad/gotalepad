@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - Gotalepad</title>
+
+  <link rel="stylesheet" href="./style.css">
+
+  <style>
+    *{
+      margin:0;
+      padding:0;
+      box-sizing:border-box;
+    }
+
+    body{
+      font-family:Arial, Helvetica, sans-serif;
+      background:#fff;
+      color:#111;
+      min-height:100vh;
+    }
+
+    header{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      padding:20px 40px;
+      border-bottom:1px solid #eee;
+      background:#fff;
+    }
+
+    .logo{
+      font-size:42px;
+      font-weight:bold;
+      color:#ff5000;
+    }
+
+    header a{
+      text-decoration:none;
+      color:#111;
+      font-weight:bold;
+    }
+
+    .container{
+      display:flex;
+      min-height:calc(100vh - 85px);
+    }
+
+    .left{
+      flex:1;
+      background:linear-gradient(135deg,#ff5000,#ff6b81);
+      color:#fff;
+      padding:80px;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+    }
+
+    .left h1{
+      font-size:70px;
+      line-height:1.1;
+      margin-bottom:25px;
+    }
+
+    .left p{
+      font-size:22px;
+      line-height:1.7;
+      opacity:.95;
+    }
+
+    .features{
+      margin-top:40px;
+    }
+
+    .features div{
+      margin-bottom:18px;
+      font-size:20px;
+    }
+
+    .right{
+      flex:1;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      padding:40px;
+      background:#fff;
+    }
+
+    .form-box{
+      width:100%;
+      max-width:450px;
+    }
+
+    .form-box h2{
+      font-size:58px;
+      margin-bottom:10px;
+    }
+
+    .form-box p{
+      color:#666;
+      margin-bottom:35px;
+      font-size:18px;
+    }
+
+    .input-group{
+      margin-bottom:25px;
+    }
+
+    .input-group label{
+      display:block;
+      margin-bottom:10px;
+      font-weight:bold;
+    }
+
+    .input-group input{
+      width:100%;
+      padding:18px;
+      border:1px solid #ddd;
+      border-radius:12px;
+      font-size:17px;
+      outline:none;
+    }
+
+    .input-group input:focus{
+      border-color:#ff5000;
+    }
+
+    .register-btn{
+      width:100%;
+      padding:18px;
+      border:none;
+      background:#ff5000;
+      color:#fff;
+      border-radius:12px;
+      font-size:20px;
+      font-weight:bold;
+      cursor:pointer;
+      transition:.3s;
+    }
+
+    .register-btn:hover{
+      background:#e64900;
+    }
+
+    .bottom-text{
+      text-align:center;
+      margin-top:25px;
+      color:#666;
+      font-size:16px;
+    }
+
+    .bottom-text a{
+      color:#ff5000;
+      text-decoration:none;
+      font-weight:bold;
+    }
+
+    @media(max-width:900px){
+
+      .container{
+        flex-direction:column;
+      }
+
+      .left{
+        padding:50px 30px;
+      }
+
+      .left h1{
+        font-size:48px;
+      }
+
+      .form-box h2{
+        font-size:42px;
+      }
+
+      header{
+        padding:20px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Gotalepad</div>
+
+  <a href="./login.html">Login</a>
+</header>
+
+<div class="container">
+
+  <div class="left">
+
+    <h1>Selamat Datang di Gotalepad</h1>
+
+    <p>
+      Mulai perjalanan menulismu sekarang.
+      Bangun komunitas pembaca dan bagikan ceritamu ke dunia.
+    </p>
+
+    <div class="features">
+      <div>📚 Baca jutaan cerita</div>
+      <div>✍️ Tulis novelmu sendiri</div>
+      <div>⚡ Nikmati fitur Premium</div>
+    </div>
+
+  </div>
+
+  <div class="right">
+
+    <div class="form-box">
+
+      <h2>Buat Akun</h2>
+
+      <p>Daftar untuk mulai membaca dan menulis</p>
+
+      <form id="registerForm">
+
+        <div class="input-group">
+          <label>Username</label>
+
+          <input
+            type="text"
+            id="username"
+            placeholder="Masukkan username"
+            required
+          >
+        </div>
+
+        <div class="input-group">
+          <label>Email</label>
+
+          <input
+            type="email"
+            id="email"
+            placeholder="Masukkan email"
+            required
+          >
+        </div>
+
+        <div class="input-group">
+          <label>Password</label>
+
+          <input
+            type="password"
+            id="password"
+            placeholder="Minimal 6 karakter"
+            required
+          >
+        </div>
+
+        <button type="submit" class="register-btn">
+          Daftar
+        </button>
+
+      </form>
+
+      <div class="bottom-text">
+        Sudah punya akun?
+        <a href="./login.html">Login</a>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<script type="module">
+
+import { auth, db } from "./firebase.js";
+
+import {
+  createUserWithEmailAndPassword
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+import {
+  doc,
+  setDoc
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const form =
+document.getElementById("registerForm");
+
+form.addEventListener("submit",
+async (e)=>{
+
+  e.preventDefault();
+
+  const username =
+  document.getElementById("username").value;
+
+  const email =
+  document.getElementById("email").value;
+
+  const password =
+  document.getElementById("password").value;
+
+  try{
+
+    const userCredential =
+    await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+
+    const user =
+    userCredential.user;
+
+    await setDoc(
+      doc(db,"users",user.uid),
+      {
+        uid:user.uid,
+        username:username,
+        email:email,
+        premium:false,
+        createdAt:new Date()
+      }
+    );
+
+    alert("Register berhasil!");
+
+    window.location.href =
+    "./index.html";
+
+  }catch(error){
+
+    alert(error.message);
+
+    console.error(error);
+
+  }
+
+});
+
+</script>
+
+</body>
+</html>
